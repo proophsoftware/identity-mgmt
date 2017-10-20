@@ -3,6 +3,9 @@ declare(strict_types = 1);
 
 namespace App\Config;
 
+use App\Api\MsgDesc;
+use App\Infrastructure\EventMachine\UserTypeSchemaDescription;
+
 return [
     'environment' => getenv('PROOPH_ENV')?: 'prod',
     'pdo' => [
@@ -30,6 +33,9 @@ return [
         'ui_exchange' => getenv('RABBIT_UI_EXCHANGE')?: 'ui-exchange',
     ],
     'event_machine' => [
-        'descriptions' => []
+        'descriptions' => [
+            MsgDesc::class,
+            UserTypeSchemaDescription::class,
+        ]
     ]
 ];

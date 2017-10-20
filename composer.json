@@ -1,6 +1,6 @@
 {
-  "name": "proophsoftware/event-machine-skeleton",
-  "description": "Dockerized skeleton for prooph software Event Machine",
+  "name": "proophsoftware/identity-mgmt",
+  "description": "Event Sourced Identity Mgmt",
   "homepage": "http://prooph.de/",
   "license": "BSD-3-Clause",
   "authors": [
@@ -29,7 +29,6 @@
     "nikic/fast-route": "^1.0",
     "psr/log": "^1.0",
     "monolog/monolog": "^1.21",
-    "prooph/psr7-middleware": "^0.6",
     "mongodb/mongodb": "^1.0"
   },
   "require-dev": {

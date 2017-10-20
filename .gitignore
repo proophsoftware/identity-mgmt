@@ -13,3 +13,4 @@ data/*
 src/Example/*
 bin/example.php
 composer.lock
+app.env
