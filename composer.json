@@ -37,7 +37,10 @@
   "autoload": {
     "psr-4": {
       "App\\": "src/"
-    }
+    },
+    "files": [
+      "src/Infrastructure/Password/hash.php"
+    ]
   },
   "autoload-dev": {
     "psr-4": {

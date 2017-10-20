@@ -35,6 +35,7 @@ final class MsgDesc implements EventMachineDescription
     const KEY_PASSWORD = 'password';
     const KEY_VALIDATED = 'validated';
     const KEY_ROLES = 'roles';
+    const KEY_DATA = 'data';
 
     //UserTypeSchema Msg Keys
     const KEY_TYPE = 'type';
@@ -53,6 +54,7 @@ final class MsgDesc implements EventMachineDescription
         $validated = ['type' => 'boolean', 'default' => false];
         $role = ['type' => 'string', 'minLength' => 3];
         $roles = ['type' => 'array', 'item' => $role];
+        $data = ['type' => 'object', 'additionalProperties' => true];
 
         //UserTypeSchema
         $type = ['type' => 'string', 'minLength' => 3];
@@ -75,19 +77,21 @@ final class MsgDesc implements EventMachineDescription
         $eventMachine->registerCommand(self::CMD_REGISTER_USER, JsonSchema::object([
             self::KEY_TENANT_ID => $tenantId,
             self::KEY_USER_ID => $userId,
+            self::KEY_TYPE => $type,
+            self::KEY_DATA => $data,
             self::KEY_ROLES => $roles,
             self::KEY_EMAIL => $email,
             self::KEY_PASSWORD => $password,
-            self::KEY_TYPE => $type,
         ]));
 
         $eventMachine->registerEvent(self::EVT_USER_REGISTERED, JsonSchema::object([
             self::KEY_TENANT_ID => $tenantId,
             self::KEY_USER_ID => $userId,
+            self::KEY_TYPE => $type,
+            self::KEY_DATA => $data,
             self::KEY_ROLES => $roles,
             self::KEY_EMAIL => $email,
             self::KEY_PASSWORD => $password,
-            self::KEY_TYPE => $type,
             self::KEY_VALIDATED => $validated,
         ]));
     }

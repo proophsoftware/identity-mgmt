@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace App\Config;
 
 use App\Api\MsgDesc;
+use App\Infrastructure\EventMachine\UserDescription;
 use App\Infrastructure\EventMachine\UserTypeSchemaDescription;
 
 return [
@@ -36,6 +37,7 @@ return [
         'descriptions' => [
             MsgDesc::class,
             UserTypeSchemaDescription::class,
+            UserDescription::class,
         ]
     ]
 ];
