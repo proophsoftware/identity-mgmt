@@ -9,11 +9,12 @@
 
 namespace App\Model\Identity;
 
-use App\Infrastructure\Util\VOArray;
+use Prooph\EventMachine\Data\ImmutableRecord;
+use Prooph\EventMachine\Data\ImmutableRecordLogic;
 
-class Login
+class Login implements ImmutableRecord
 {
-    use VOArray;
+    use ImmutableRecordLogic;
 
     /**
      * @var string
@@ -32,18 +33,11 @@ class Login
 
     public static function fromCredentials(string $email, string $passwordHash): self
     {
-        $self = new self();
-        $self->email = $email;
-        $self->passwordHash = $passwordHash;
-        $self->verified = false;
-        return $self;
-    }
-
-    public static function fromArray(array $data): self
-    {
-        $self = new self();
-        $self->mergeProps($self, $data);
-        return $self;
+        return self::fromArray([
+            'email' => $email,
+            'passwordHash' => $passwordHash,
+            'verified' => false
+        ]);
     }
 
     /**
@@ -65,7 +59,7 @@ class Login
     /**
      * @return bool
      */
-    public function isVerified(): bool
+    public function verified(): bool
     {
         return $this->verified;
     }
@@ -75,9 +69,5 @@ class Login
         $cp = clone $this;
         $cp->verified = true;
         return $cp;
-    }
-
-    private function __construct()
-    {
     }
 }

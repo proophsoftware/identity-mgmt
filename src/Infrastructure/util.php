@@ -1,0 +1,21 @@
+<?php
+/**
+ * This file is part of the proophsoftware/identity-mgmt.
+ * (c) %year% prooph software GmbH <contact@prooph.de>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+namespace App\Infrastructure;
+
+use Prooph\Common\Messaging\Message;
+use Prooph\Common\Messaging\MessageFactory;
+
+function replace_payload(MessageFactory $messageFactory, Message $message, array $payload): Message {
+    return $messageFactory->createMessageFromArray($message->messageName(), [
+        'uuid' => $message->uuid(),
+        'payload' => $payload,
+        'metadata' => $message->metadata(),
+        'created_at' => $message->createdAt(),
+    ]);
+}

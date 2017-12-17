@@ -9,20 +9,58 @@
 
 namespace App\Model;
 
-class UserTypeSchemaState
+use MongoDB\BSON\Serializable;
+use Prooph\EventMachine\Data\ImmutableRecord;
+use Prooph\EventMachine\Data\ImmutableRecordLogic;
+
+class UserTypeSchemaState implements ImmutableRecord, Serializable
 {
+    use ImmutableRecordLogic;
+
     /**
-     * @var string
+     * @var TenantId
      */
-    public $tenantId;
+    private $tenantId;
 
     /**
      * @var string
      */
-    public $type;
+    private $type;
 
     /**
      * @var array
      */
-    public $schema;
+    private $schema;
+
+    /**
+     * @return TenantId
+     */
+    public function tenantId(): TenantId
+    {
+        return $this->tenantId;
+    }
+
+    /**
+     * @return string
+     */
+    public function type(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return array
+     */
+    public function schema(): array
+    {
+        return $this->schema;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function bsonSerialize()
+    {
+        return $this->toArray();
+    }
 }

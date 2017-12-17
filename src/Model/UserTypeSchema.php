@@ -30,13 +30,6 @@ class UserTypeSchema
     }
 
     public static function whenUserTypeSchemaDefined(Message $userTypeSchemaDefined): UserTypeSchemaState {
-        $state = new UserTypeSchemaState();
-
-        $state->tenantId = $userTypeSchemaDefined->payload()[MsgDesc::KEY_TENANT_ID];
-        $state->type = $userTypeSchemaDefined->payload()[MsgDesc::KEY_TYPE];
-        $state->schema = $userTypeSchemaDefined->payload()[MsgDesc::KEY_SCHEMA];
-
-        return $state;
+        return UserTypeSchemaState::fromArray($userTypeSchemaDefined->payload());
     }
-
 }

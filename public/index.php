@@ -13,11 +13,11 @@ require 'vendor/autoload.php';
 $container = include 'config/container.php';
 
 //Note: this is important and needs to happen before further dependencies are pulled
-$container->get('eventMachine')->bootstrap();
+$container->get(\Prooph\EventMachine\EventMachine::class)->bootstrap();
 
 $app = new \Zend\Stratigility\MiddlewarePipe();
 
-$app->pipe($container->get('httpErrorHandler'));
+$app->pipe($container->get(\Zend\Stratigility\Middleware\ErrorHandler::class));
 
 $app->pipe(new \Zend\Expressive\Helper\BodyParams\BodyParamsMiddleware());
 

@@ -4,8 +4,8 @@ declare(strict_types = 1);
 namespace App\Config;
 
 use App\Api\MsgDesc;
-use App\Infrastructure\EventMachine\UserDescription;
-use App\Infrastructure\EventMachine\UserTypeSchemaDescription;
+use App\Infrastructure\User\UserDescription;
+use App\Infrastructure\User\UserTypeSchemaDescription;
 
 return [
     'environment' => getenv('PROOPH_ENV')?: 'prod',

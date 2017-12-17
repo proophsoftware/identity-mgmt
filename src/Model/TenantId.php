@@ -47,5 +47,4 @@ class TenantId
     {
         return $this->tenantId->toString();
     }
-
 }

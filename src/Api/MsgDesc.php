@@ -33,9 +33,12 @@ final class MsgDesc implements EventMachineDescription
     const KEY_USER_ID = 'userId';
     const KEY_EMAIL = 'email';
     const KEY_PASSWORD = 'password';
-    const KEY_VALIDATED = 'validated';
     const KEY_ROLES = 'roles';
     const KEY_DATA = 'data';
+
+    //User Meta Keys
+    const META_PASSWORD_HASHED = 'password_hashed';
+    const META_USER_VALIDATED = 'user_validated';
 
     //UserTypeSchema Msg Keys
     const KEY_TYPE = 'type';
@@ -51,7 +54,6 @@ final class MsgDesc implements EventMachineDescription
         $userId = $uuidSchema;
         $email = ['type' => 'string', 'format' => 'email'];
         $password = ['type' => 'string', 'minLength' => 8];
-        $validated = ['type' => 'boolean', 'default' => false];
         $role = ['type' => 'string', 'minLength' => 3];
         $roles = ['type' => 'array', 'item' => $role];
         $data = ['type' => 'object', 'additionalProperties' => true];
@@ -92,7 +94,6 @@ final class MsgDesc implements EventMachineDescription
             self::KEY_ROLES => $roles,
             self::KEY_EMAIL => $email,
             self::KEY_PASSWORD => $password,
-            self::KEY_VALIDATED => $validated,
         ]));
     }
 }

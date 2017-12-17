@@ -13,10 +13,13 @@
     <testsuite name="prooph software Identity Mgmt Test Suite">
         <directory>./tests/</directory>
     </testsuite>
-
     <filter>
         <whitelist>
             <directory>./src/</directory>
         </whitelist>
     </filter>
+    <php>
+        <!-- Set low pwd hash cost to speed up unit tests. Do NOT use such a low cost in production!!! -->
+        <env name="PWD_HASH_COST" value="4" />
+    </php>
 </phpunit>

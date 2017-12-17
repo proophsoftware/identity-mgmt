@@ -10,9 +10,15 @@
 namespace AppTest;
 
 use App\Api\MsgDesc;
+use App\Infrastructure\EventMachine\MetadataCleaner;
+use App\Infrastructure\Password\PasswordHasher;
+use App\Infrastructure\Password\PwdHashFuncHasher;
+use App\Infrastructure\User\UserValidator;
 use App\Model\Identity\Login;
 use App\Model\TenantId;
 use App\Model\User\UserId;
+use AppTest\Mock\NoopPasswordHasher;
+use AppTest\Mock\NoopUserValidator;
 use PHPUnit\Framework\TestCase;
 use Prooph\Common\Messaging\Message;
 use Prooph\EventMachine\Container\EventMachineContainer;
@@ -81,6 +87,18 @@ class BaseTestCase extends TestCase
             MsgDesc::KEY_EMAIL => $this->adminLogin->email(),
             MsgDesc::KEY_PASSWORD => 'my_secret',
         ]);
+    }
+
+    protected function getRegisterUserServices($mockPasswordHasher = true): array
+    {
+        return [
+            MetadataCleaner::class => new MetadataCleaner(),
+            UserValidator::class => new NoopUserValidator(),
+            PasswordHasher::class => $mockPasswordHasher?
+                new NoopPasswordHasher()
+                //Note: the prod service is slow, use the mocked service by default
+                : new PwdHashFuncHasher($this->eventMachine->messageFactory()),
+        ];
     }
 
     protected function buildCmd(string $cmdName, array $payload, array $metadata = []): Message

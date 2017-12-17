@@ -10,7 +10,6 @@
 namespace App\Model;
 
 use App\Api\MsgDesc;
-use function App\Infrastructure\Password\pwd_hash;
 use Prooph\Common\Messaging\Message;
 
 /**
@@ -24,27 +23,30 @@ use Prooph\Common\Messaging\Message;
  *
  * @package App\Model
  */
-class User
+final class User
 {
-    public static function register(Message $registerUser)
+    public static function register(Message $registerUser): \Generator
     {
-        $payload = $registerUser->payload();
-        $payload['password'] = pwd_hash($payload['password']);
-        $payload['validated'] = false;
-        yield $payload;
+        if(!$registerUser->metadata()[MsgDesc::META_USER_VALIDATED] ?? false) {
+            throw new \RuntimeException("User data was not validated by infrastructure. You should add a command preprocessor.");
+        }
+
+        if(!$registerUser->metadata()[MsgDesc::META_PASSWORD_HASHED] ?? false) {
+            throw new \RuntimeException("Password was not hashed by infrastructure. You should add a command preprocessor.");
+        }
+
+        yield $registerUser->payload();
     }
 
     public static function whenUserRegistered(Message $userRegistered): UserState
     {
-        $state = new UserState();
+        $userData = $userRegistered->payload();
 
-        $state->tenantId = $userRegistered->payload()[MsgDesc::KEY_TENANT_ID];
-        $state->userId = $userRegistered->payload()[MsgDesc::KEY_USER_ID];
-        $state->type = $userRegistered->payload()[MsgDesc::KEY_TYPE];
-        $state->roles = $userRegistered->payload()[MsgDesc::KEY_ROLES];
-        $state->data = $userRegistered->payload()[MsgDesc::KEY_DATA];
-        $state->validated = $userRegistered->payload()[MsgDesc::KEY_VALIDATED];
+        unset($userData[MsgDesc::KEY_EMAIL]);
+        unset($userData[MsgDesc::KEY_PASSWORD]);
 
-        return $state;
+        $userData['identities'] = [];
+
+        return UserState::fromArray($userData);
     }
 }

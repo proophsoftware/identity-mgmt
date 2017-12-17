@@ -9,40 +9,98 @@
 
 namespace App\Model;
 
-class UserState
+use App\Model\User\UserId;
+use MongoDB\BSON\Serializable;
+use Prooph\EventMachine\Data\ImmutableRecord;
+use Prooph\EventMachine\Data\ImmutableRecordLogic;
+
+final class UserState implements ImmutableRecord, Serializable
 {
+    use ImmutableRecordLogic;
+
     /**
-     * @var string
+     * @var TenantId
      */
-    public $tenantId;
+    private $tenantId;
+
+    /**
+     * @var UserId
+     */
+    private $userId;
 
     /**
      * @var string
      */
-    public $userId;
-
-    /**
-     * @var string
-     */
-    public $type;
+    private $type;
 
     /**
      * @var array
      */
-    public $roles;
+    private $roles;
 
     /**
      * @var array
      */
-    public $data;
+    private $data;
 
     /**
      * @var array
      */
-    public $identities;
+    private $identities;
 
     /**
-     * @var boolean
+     * @return TenantId
      */
-    public $validated;
+    public function tenantId(): TenantId
+    {
+        return $this->tenantId;
+    }
+
+    /**
+     * @return UserId
+     */
+    public function userId(): UserId
+    {
+        return $this->userId;
+    }
+
+    /**
+     * @return string
+     */
+    public function type(): string
+    {
+        return $this->type;
+    }
+
+    /**
+     * @return array
+     */
+    public function roles(): array
+    {
+        return $this->roles;
+    }
+
+    /**
+     * @return array
+     */
+    public function data(): array
+    {
+        return $this->data;
+    }
+
+    /**
+     * @return array
+     */
+    public function identities(): array
+    {
+        return $this->identities;
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function bsonSerialize()
+    {
+        return $this->toArray();
+    }
 }

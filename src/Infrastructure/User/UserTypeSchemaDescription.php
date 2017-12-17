@@ -7,7 +7,7 @@
  * file that was distributed with this source code.
  */
 
-namespace App\Infrastructure\EventMachine;
+namespace App\Infrastructure\User;
 
 use App\Api\MsgDesc;
 use App\Model\UserTypeSchema;
