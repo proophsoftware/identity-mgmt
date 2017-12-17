@@ -9,6 +9,7 @@
 
 namespace App\Model;
 
+use App\Model\UserTypeSchema\UserTypeId;
 use MongoDB\BSON\Serializable;
 use Prooph\EventMachine\Data\ImmutableRecord;
 use Prooph\EventMachine\Data\ImmutableRecordLogic;
@@ -16,6 +17,11 @@ use Prooph\EventMachine\Data\ImmutableRecordLogic;
 class UserTypeSchemaState implements ImmutableRecord, Serializable
 {
     use ImmutableRecordLogic;
+
+    /**
+     * @var UserTypeId
+     */
+    private $typeId;
 
     /**
      * @var TenantId
@@ -31,6 +37,14 @@ class UserTypeSchemaState implements ImmutableRecord, Serializable
      * @var array
      */
     private $schema;
+
+    /**
+     * @return UserTypeId
+     */
+    public function typeId(): UserTypeId
+    {
+        return $this->typeId;
+    }
 
     /**
      * @return TenantId

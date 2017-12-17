@@ -17,6 +17,7 @@ use App\Infrastructure\MongoDb\AggregateReadModel;
 use App\Infrastructure\MongoDb\MongoConnection;
 use App\Infrastructure\Password\PasswordHasher;
 use App\Infrastructure\Password\PwdHashFuncHasher;
+use App\Infrastructure\User\UserTypeIdInjector;
 use App\Infrastructure\User\UserTypeSchemaValidator;
 use App\Infrastructure\User\UserValidator;
 use Codeliner\ArrayReader\ArrayReader;
@@ -31,6 +32,7 @@ use Prooph\EventMachine\Container\ContainerChain;
 use Prooph\EventMachine\Container\EventMachineContainer;
 use Prooph\EventMachine\Container\ServiceRegistry;
 use Prooph\EventMachine\EventMachine;
+use Prooph\EventMachine\Http\MessageBox;
 use Prooph\EventStore\EventStore;
 use Prooph\EventStore\Pdo\PersistenceStrategy;
 use Prooph\EventStore\Pdo\PostgresEventStore;
@@ -94,30 +96,17 @@ final class ServiceFactory
         });
     }
 
-    public function eventMachineHttpMessageBox(): EventMachineHttpMessageBox
+    public function userTypeInjector(): UserTypeIdInjector
     {
-        return $this->makeSingleton(EventMachineHttpMessageBox::class, function () {
-            $messageBox = $this->eventMachine()->httpMessageBox();
+        return $this->makeSingleton(UserTypeIdInjector::class, function () {
+            return new UserTypeIdInjector($this->eventMachine()->messageFactory());
+        });
+    }
 
-            return new class ($messageBox) implements EventMachineHttpMessageBox {
-                /**
-                 * @var MiddlewareInterface
-                 */
-                private $messageBox;
-
-                public function __construct(MiddlewareInterface $messageBox)
-                {
-                    $this->messageBox = $messageBox;
-                }
-
-                /**
-                 * @inheritdoc
-                 */
-                public function process(ServerRequestInterface $request, DelegateInterface $delegate)
-                {
-                    return $this->messageBox->process($request, $delegate);
-                }
-            };
+    public function httpMessageBox(): MessageBox
+    {
+        return $this->makeSingleton(MessageBox::class, function () {
+            return $this->eventMachine()->httpMessageBox();
         });
     }
 

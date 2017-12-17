@@ -20,9 +20,11 @@ final class UserTypeSchemaDescription implements EventMachineDescription
 
     public static function describe(EventMachine $eventMachine): void
     {
+        $eventMachine->preProcess(MsgDesc::CMD_DEFINE_USER_TYPE_SCHEMA, UserTypeIdInjector::class);
+
         $eventMachine->process(MsgDesc::CMD_DEFINE_USER_TYPE_SCHEMA)
             ->withNew(self::USER_TYPE_SCHEMA_AR)
-            ->identifiedBy(MsgDesc::KEY_TYPE)
+            ->identifiedBy(MsgDesc::KEY_TYPE_ID)
             ->handle([UserTypeSchema::class, 'define'])
             ->recordThat(MsgDesc::EVT_USER_TYPE_SCHEMA_DEFINED)
             ->apply([UserTypeSchema::class, 'whenUserTypeSchemaDefined']);

@@ -10,6 +10,7 @@
 namespace App\Infrastructure\User;
 
 use App\Api\MsgDesc;
+use App\Model\UserTypeSchema\UserTypeId;
 use App\Model\UserTypeSchemaState;
 use Prooph\Common\Messaging\Message;
 use Prooph\EventMachine\EventMachine;
@@ -42,7 +43,10 @@ final class UserTypeSchemaValidator implements UserValidator
         /** @var UserTypeSchemaState $userTypeSchemaState */
         $userTypeSchemaState = $this->eventMachine->loadAggregateState(
             UserTypeSchemaDescription::USER_TYPE_SCHEMA_AR,
-            $message->payload()[MsgDesc::KEY_TYPE]
+            UserTypeId::fromValues(
+                $message->payload()[MsgDesc::KEY_TENANT_ID],
+                $message->payload()[MsgDesc::KEY_TYPE]
+            )
         );
 
         $this->eventMachine->jsonSchemaAssertion()->assert(

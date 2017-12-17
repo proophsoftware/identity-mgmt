@@ -10,6 +10,8 @@
 namespace App\Model;
 
 use App\Api\MsgDesc;
+use App\Model\UserTypeSchema\UserType;
+use App\Model\UserTypeSchema\UserTypeId;
 use Prooph\Common\Messaging\Message;
 
 /**
@@ -24,9 +26,13 @@ use Prooph\Common\Messaging\Message;
  */
 class UserTypeSchema
 {
-
-    public static function define(Message $defineUserTypeSchema) {
-        yield $defineUserTypeSchema->payload();
+    public static function define(Message $defineUserTypeSchema): \Generator {
+        $data = $defineUserTypeSchema->payload();
+        $data[MsgDesc::KEY_TYPE_ID] = UserTypeId::fromValues(
+            TenantId::fromString($data[MsgDesc::KEY_TENANT_ID]),
+            UserType::fromString($data[MsgDesc::KEY_TYPE])
+        )->toString();
+        yield $data;
     }
 
     public static function whenUserTypeSchemaDefined(Message $userTypeSchemaDefined): UserTypeSchemaState {

@@ -10,6 +10,8 @@
 namespace AppTest\Model;
 
 use App\Api\MsgDesc;
+use App\Model\UserTypeSchema\UserType;
+use App\Model\UserTypeSchema\UserTypeId;
 use AppTest\BaseTestCase;
 use Prooph\Common\Messaging\Message;
 
@@ -27,7 +29,7 @@ class UserTypeSchemaTest extends BaseTestCase
      */
     public function it_can_be_defined_with_a_schema()
     {
-        $this->eventMachine->bootstrapInTestMode([]);
+        $this->eventMachine->bootstrapInTestMode([], $this->getDefineUserTypeSchemaServices());
 
         $payload = [
             MsgDesc::KEY_TENANT_ID => $this->tenantId->toString(),
@@ -41,6 +43,11 @@ class UserTypeSchemaTest extends BaseTestCase
 
         /** @var Message[] $events */
         $events = $this->eventMachine->popRecordedEventsOfTestSession();
+
+        $payload[MsgDesc::KEY_TYPE_ID] = UserTypeId::fromValues(
+            $this->tenantId,
+            UserType::fromString('admin')
+        )->toString();
 
         $this->assertCount(1, $events);
         $this->assertSame(MsgDesc::EVT_USER_TYPE_SCHEMA_DEFINED, $events[0]->messageName());

@@ -13,6 +13,7 @@ use App\Api\MsgDesc;
 use App\Infrastructure\EventMachine\MetadataCleaner;
 use App\Infrastructure\Password\PasswordHasher;
 use App\Infrastructure\Password\PwdHashFuncHasher;
+use App\Infrastructure\User\UserTypeIdInjector;
 use App\Infrastructure\User\UserValidator;
 use App\Model\Identity\Login;
 use App\Model\TenantId;
@@ -98,6 +99,13 @@ class BaseTestCase extends TestCase
                 new NoopPasswordHasher()
                 //Note: the prod service is slow, use the mocked service by default
                 : new PwdHashFuncHasher($this->eventMachine->messageFactory()),
+        ];
+    }
+
+    protected function getDefineUserTypeSchemaServices(): array
+    {
+        return [
+            UserTypeIdInjector::class => new UserTypeIdInjector($this->eventMachine->messageFactory())
         ];
     }
 

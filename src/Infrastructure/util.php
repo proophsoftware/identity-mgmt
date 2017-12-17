@@ -19,3 +19,15 @@ function replace_payload(MessageFactory $messageFactory, Message $message, array
         'created_at' => $message->createdAt(),
     ]);
 }
+
+function combine_regex_patterns(string $patternA, string $patternB, string ...$patterns): string {
+    array_unshift($patterns, $patternA, $patternB);
+
+    $combinedPattern = '';
+
+    foreach ($patterns as $pattern) {
+        $combinedPattern .= rtrim(ltrim($pattern, '^'), '$');
+    }
+
+    return '^' . $combinedPattern . '$';
+};

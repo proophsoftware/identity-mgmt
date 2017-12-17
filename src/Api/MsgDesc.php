@@ -13,6 +13,7 @@ use Prooph\EventMachine\EventMachine;
 use Prooph\EventMachine\EventMachineDescription;
 use Prooph\EventMachine\JsonSchema\JsonSchema;
 use Ramsey\Uuid\Uuid;
+use function App\Infrastructure\combine_regex_patterns;
 
 final class MsgDesc implements EventMachineDescription
 {
@@ -37,10 +38,11 @@ final class MsgDesc implements EventMachineDescription
     const KEY_DATA = 'data';
 
     //User Meta Keys
-    const META_PASSWORD_HASHED = 'password_hashed';
-    const META_USER_VALIDATED = 'user_validated';
+    const META_PASSWORD_HASHED = 'passwordHashed';
+    const META_USER_VALIDATED = 'userValidated';
 
     //UserTypeSchema Msg Keys
+    const KEY_TYPE_ID = 'typeId';
     const KEY_TYPE = 'type';
     const KEY_SCHEMA = 'schema';
 
@@ -59,17 +61,21 @@ final class MsgDesc implements EventMachineDescription
         $data = ['type' => 'object', 'additionalProperties' => true];
 
         //UserTypeSchema
-        $type = ['type' => 'string', 'minLength' => 3];
+        $type = ['type' => 'string', 'minLength' => 3, 'pattern' => '^[\w]+$'];
+        $typeId = ['type' => 'string', 'pattern' => combine_regex_patterns($type['pattern'], ':::', $uuidSchema['pattern'])];
         $schema = ['type' => 'object', 'additionalProperties' => true];
 
         //Action: Define UserTypeSchema
         $eventMachine->registerCommand(self::CMD_DEFINE_USER_TYPE_SCHEMA, JsonSchema::object([
             self::KEY_TENANT_ID => $tenantId,
             self::KEY_TYPE => $type,
-            self::KEY_SCHEMA => $schema
+            self::KEY_SCHEMA => $schema,
+        ], [
+            self::KEY_TYPE_ID => $typeId,
         ]));
 
         $eventMachine->registerEvent(self::EVT_USER_TYPE_SCHEMA_DEFINED, JsonSchema::object([
+            self::KEY_TYPE_ID => $typeId,
             self::KEY_TENANT_ID => $tenantId,
             self::KEY_TYPE => $type,
             self::KEY_SCHEMA => $schema
