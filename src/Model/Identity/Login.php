@@ -9,6 +9,7 @@
 
 namespace App\Model\Identity;
 
+use App\Model\TenantId;
 use Prooph\EventMachine\Data\ImmutableRecord;
 use Prooph\EventMachine\Data\ImmutableRecordLogic;
 
@@ -17,9 +18,14 @@ class Login implements ImmutableRecord
     use ImmutableRecordLogic;
 
     /**
-     * @var string
+     * @var TenantId
      */
-    private $email;
+    private $tenantId;
+
+    /**
+     * @var Email
+     */
+    private $lowercaseEmail;
 
     /**
      * @var string
@@ -31,21 +37,30 @@ class Login implements ImmutableRecord
      */
     private $verified;
 
-    public static function fromCredentials(string $email, string $passwordHash): self
+    public static function fromCredentials(TenantId $tenantId, Email $email, string $passwordHash): self
     {
         return self::fromArray([
-            'email' => $email,
+            'tenantId' => $tenantId->toString(),
+            'lowercaseEmail' => $email->toLowercase()->toString(),
             'passwordHash' => $passwordHash,
             'verified' => false
         ]);
     }
 
     /**
-     * @return string
+     * @return TenantId
      */
-    public function email(): string
+    public function tenantId(): TenantId
     {
-        return $this->email;
+        return $this->tenantId;
+    }
+
+    /**
+     * @return Email
+     */
+    public function lowercaseEmail(): Email
+    {
+        return $this->lowercaseEmail;
     }
 
     /**

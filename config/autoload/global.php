@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace App\Config;
 
 use App\Api\MsgDesc;
+use App\Infrastructure\Identity\IdentityDescription;
 use App\Infrastructure\User\UserDescription;
 use App\Infrastructure\User\UserTypeSchemaDescription;
 
@@ -38,6 +39,7 @@ return [
             MsgDesc::class,
             UserTypeSchemaDescription::class,
             UserDescription::class,
+            IdentityDescription::class,
         ]
     ]
 ];

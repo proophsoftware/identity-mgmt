@@ -78,7 +78,8 @@ class BaseTestCase extends TestCase
         $this->tenantId = TenantId::fromString('03c8d742-1bed-46d1-a985-080b9a036656');
         $this->userId = UserId::fromString('42282edf-9007-4218-b3f8-931580d1abd0');
         $this->adminLogin = Login::fromArray([
-            'email' => 'admin@prooph.local',
+            'tenantId' => $this->tenantId->toString(),
+            'lowercaseEmail' => 'admin@prooph.local',
             'passwordHash' => '$2y$10$9s6ahvJfptN/m3BRcl6oJONqvwU0fQeif5KUDuzR259gcOyZqKfRO',
             'verified' => true
         ]);
@@ -101,7 +102,24 @@ class BaseTestCase extends TestCase
             MsgDesc::KEY_TYPE => $type,
             MsgDesc::KEY_ROLES => $roles,
             MsgDesc::KEY_DATA => $data,
-            MsgDesc::KEY_EMAIL => $this->adminLogin->email(),
+            MsgDesc::KEY_EMAIL => $this->adminLogin->lowercaseEmail()->toString(),
+            MsgDesc::KEY_PASSWORD => 'my_secret',
+        ]);
+    }
+
+    protected function userRegistered(
+        string $type = self::TYPE_ADMIN,
+        array $roles = [self::ROLE_ADMIN],
+        array $data = ['username' => 'sudo']
+    ): Message
+    {
+        return $this->buildEvent(MsgDesc::EVT_USER_REGISTERED, [
+            MsgDesc::KEY_TENANT_ID => $this->tenantId->toString(),
+            MsgDesc::KEY_USER_ID => $this->userId->toString(),
+            MsgDesc::KEY_TYPE => $type,
+            MsgDesc::KEY_ROLES => $roles,
+            MsgDesc::KEY_DATA => $data,
+            MsgDesc::KEY_EMAIL => $this->adminLogin->lowercaseEmail()->toString(),
             MsgDesc::KEY_PASSWORD => 'my_secret',
         ]);
     }
@@ -126,6 +144,16 @@ class BaseTestCase extends TestCase
             MsgDesc::KEY_TYPE => $type,
             MsgDesc::KEY_SCHEMA => $schema,
         ]);
+    }
+
+    protected function addIdentity(string $email = null, string $password = null): Message
+    {
+        return $this->buildCmd(MsgDesc::CMD_ADD_IDENTITY, MsgDesc::addIdentityPayload(
+            $this->tenantId->toString(),
+            $this->userId->toString(),
+            $email? : $this->adminLogin->lowercaseEmail()->toString(),
+            $password? : $this->adminLogin->passwordHash()
+        ));
     }
 
     protected function getRegisterUserServices($mockPasswordHasher = true): array

@@ -13,7 +13,7 @@ use App\Model\TenantId;
 
 final class UserTypeId
 {
-    private const DELIMITER = ':::';
+    public const DELIMITER = ':::';
     /**
      * @var TenantId
      */

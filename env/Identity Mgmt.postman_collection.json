@@ -1,0 +1,61 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Identity Mgmt",
+		"_postman_id": "303d9095-c89f-623c-9006-541ec80d853b",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Identity.DefineUserTypeSchema",
+			"request": {
+				"url": "http://localhost:8080/api/messagebox/Identity.DefineUserTypeSchema",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payload\": {\n\t\t\"tenantId\": \"b5d0170d-a7d1-4d6a-9a24-998a6878e1ce\",\n\t\t\"type\": \"Writer\",\n\t\t\"schema\": {\n\t\t\t\"type\": \"object\",\n\t\t\t\"properties\": {\n\t\t\t\t\"age\": {\n\t\t\t\t\t\"type\": \"number\",\n\t\t\t\t\t\"minimum\": 14\n\t\t\t\t}\n\t\t\t}\n\t\t}\n\t}\n}"
+				},
+				"description": "Register a new user"
+			},
+			"response": []
+		},
+		{
+			"name": "Identity.RegisterUser",
+			"request": {
+				"url": "http://localhost:8080/api/messagebox/Identity.RegisterUser",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					},
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"payload\": {\n\t\t\"userId\": \"f8897437-a772-49c0-8411-7548f4037ce2\",\n\t\t\"tenantId\": \"b5d0170d-a7d1-4d6a-9a24-998a6878e1ce\",\n\t\t\"type\": \"Writer\",\n\t\t\"data\": {\n\t\t\t\"age\": 33\n\t\t},\n\t\t\"roles\": [\n\t\t\t\"Writer\"\n\t\t],\n\t\t\"email\": \"kontakt@codelienr.ws\",\n\t\t\"password\": \"dev123456\"\n\t}\n}"
+				},
+				"description": "Register a new user"
+			},
+			"response": []
+		}
+	]
+}

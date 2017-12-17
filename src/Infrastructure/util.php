@@ -31,3 +31,8 @@ function combine_regex_patterns(string $patternA, string $patternB, string ...$p
 
     return '^' . $combinedPattern . '$';
 };
+
+//Exception factories
+function message_not_allowed(Message $message, array $allowedMessages): \RuntimeException {
+    return new \RuntimeException("Message not allowed. Got {$message->messageName()}, but allowed are only " . implode(", ", $allowedMessages));
+};

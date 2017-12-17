@@ -12,6 +12,7 @@ namespace App\Service;
 use App\Http\EventMachineHttpMessageBox;
 use App\Http\MessageSchemaMiddleware;
 use App\Infrastructure\EventMachine\MetadataCleaner;
+use App\Infrastructure\Identity\AddIdentity;
 use App\Infrastructure\Logger\PsrErrorLogger;
 use App\Infrastructure\MongoDb\AggregateReadModel;
 use App\Infrastructure\MongoDb\MongoConnection;
@@ -100,6 +101,14 @@ final class ServiceFactory
     {
         return $this->makeSingleton(UserTypeIdInjector::class, function () {
             return new UserTypeIdInjector($this->eventMachine()->messageFactory());
+        });
+    }
+
+    //----- Process Manager -----//
+    public function addIdentity(): AddIdentity
+    {
+        return $this->makeSingleton(AddIdentity::class, function () {
+            return new AddIdentity($this->eventMachine());
         });
     }
 

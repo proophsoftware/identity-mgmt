@@ -9,6 +9,10 @@
 
 namespace App\Api;
 
+use App\Model\Identity\Email;
+use App\Model\Identity\IdentityId;
+use App\Model\TenantId;
+use App\Model\UserTypeSchema\UserTypeId;
 use Prooph\EventMachine\EventMachine;
 use Prooph\EventMachine\EventMachineDescription;
 use Prooph\EventMachine\JsonSchema\JsonSchema;
@@ -46,6 +50,12 @@ final class MsgDesc implements EventMachineDescription
     const KEY_TYPE = 'type';
     const KEY_SCHEMA = 'schema';
 
+    //Identity
+    const KEY_IDENTITY_ID = 'identityId';
+    //const KEY_USER_ID = 'userId';
+    //const KEY_EMAIL = 'email';
+    //const KEY_PASSWORD = 'password';
+
     public static function describe(EventMachine $eventMachine): void
     {
         //Misc
@@ -54,7 +64,7 @@ final class MsgDesc implements EventMachineDescription
 
         //User
         $userId = $uuidSchema;
-        $email = ['type' => 'string', 'format' => 'email'];
+        $email = ['type' => 'string', 'pattern' => Email::VALIDATION_PATTERN];
         $password = ['type' => 'string', 'minLength' => 8];
         $role = ['type' => 'string', 'minLength' => 3];
         $roles = ['type' => 'array', 'item' => $role];
@@ -62,8 +72,11 @@ final class MsgDesc implements EventMachineDescription
 
         //UserTypeSchema
         $type = ['type' => 'string', 'minLength' => 3, 'pattern' => '^[\w]+$'];
-        $typeId = ['type' => 'string', 'pattern' => combine_regex_patterns($type['pattern'], ':::', $uuidSchema['pattern'])];
+        $typeId = ['type' => 'string', 'pattern' => combine_regex_patterns($type['pattern'], UserTypeId::DELIMITER, $uuidSchema['pattern'])];
         $schema = ['type' => 'object', 'additionalProperties' => true];
+
+        //Identity
+        $identityId = ['type' => 'string', 'pattern' => combine_regex_patterns(Email::VALIDATION_PATTERN, IdentityId::DELIMITER, $uuidSchema['pattern'])];
 
         //Action: Define UserTypeSchema
         $eventMachine->registerCommand(self::CMD_DEFINE_USER_TYPE_SCHEMA, JsonSchema::object([
@@ -101,6 +114,21 @@ final class MsgDesc implements EventMachineDescription
             self::KEY_EMAIL => $email,
             self::KEY_PASSWORD => $password,
         ]));
+
+        //Action Add Identity
+        $eventMachine->registerCommand(self::CMD_ADD_IDENTITY, JsonSchema::object([
+            self::KEY_IDENTITY_ID => $identityId,
+            self::KEY_USER_ID => $userId,
+            self::KEY_EMAIL => $email,
+            self::KEY_PASSWORD => $password
+        ]));
+
+        $eventMachine->registerEvent(self::EVT_IDENTITY_ADDED, JsonSchema::object([
+            self::KEY_IDENTITY_ID => $identityId,
+            self::KEY_USER_ID => $userId,
+            self::KEY_EMAIL => $email,
+            self::KEY_PASSWORD => $password
+        ]));
     }
 
     public static function defineUserTypeSchemaPayload(string $tenantId, string $type, array $schema, string $userTypeId = null): array {
@@ -115,5 +143,26 @@ final class MsgDesc implements EventMachineDescription
         }
 
         return $p;
+    }
+
+    public static function registerUserPayload(string $userId, string $tenantId, string $type, array $data, array $roles, string $email, string $password): array {
+        return [
+            self::KEY_TENANT_ID => $tenantId,
+            self::KEY_USER_ID => $userId,
+            self::KEY_TYPE => $type,
+            self::KEY_DATA => $data,
+            self::KEY_ROLES => $roles,
+            self::KEY_EMAIL => $email,
+            self::KEY_PASSWORD => $password,
+        ];
+    }
+
+    public static function addIdentityPayload(string $tenantId, string $userId, string $email, string $password): array  {
+        return [
+            self::KEY_IDENTITY_ID => IdentityId::fromValues(TenantId::fromString($tenantId), Email::fromString($email))->toString(),
+            self::KEY_USER_ID => $userId,
+            self::KEY_EMAIL => $email,
+            self::KEY_PASSWORD => $password
+        ];
     }
 }
