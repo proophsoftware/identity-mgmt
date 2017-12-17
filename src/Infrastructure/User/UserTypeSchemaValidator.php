@@ -10,6 +10,8 @@
 namespace App\Infrastructure\User;
 
 use App\Api\MsgDesc;
+use App\Model\TenantId;
+use App\Model\UserTypeSchema\UserType;
 use App\Model\UserTypeSchema\UserTypeId;
 use App\Model\UserTypeSchemaState;
 use Prooph\Common\Messaging\Message;
@@ -44,8 +46,8 @@ final class UserTypeSchemaValidator implements UserValidator
         $userTypeSchemaState = $this->eventMachine->loadAggregateState(
             UserTypeSchemaDescription::USER_TYPE_SCHEMA_AR,
             UserTypeId::fromValues(
-                $message->payload()[MsgDesc::KEY_TENANT_ID],
-                $message->payload()[MsgDesc::KEY_TYPE]
+                TenantId::fromString($message->payload()[MsgDesc::KEY_TENANT_ID]),
+                UserType::fromString($message->payload()[MsgDesc::KEY_TYPE])
             )
         );
 

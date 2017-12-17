@@ -18,6 +18,8 @@ use App\Infrastructure\User\UserValidator;
 use App\Model\Identity\Login;
 use App\Model\TenantId;
 use App\Model\User\UserId;
+use App\Model\UserTypeSchema\UserType;
+use App\Model\UserTypeSchema\UserTypeId;
 use AppTest\Mock\NoopPasswordHasher;
 use AppTest\Mock\NoopUserValidator;
 use PHPUnit\Framework\TestCase;
@@ -28,8 +30,18 @@ use Prooph\EventMachine\EventMachine;
 class BaseTestCase extends TestCase
 {
     const TYPE_ADMIN = 'Admin';
+    const TYPE_EDITOR = 'Editor';
     const ROLE_ADMIN = 'Admin';
     const ROLE_EDITOR = 'Editor';
+
+    const EDITOR_SCHEMA = [
+        'type' => 'object',
+        'properties' => [
+            'level' => [
+                'enum' => ['guest', 'regular', 'trusted', 'member']
+            ]
+        ]
+    ];
 
     /**
      * @var EventMachine
@@ -77,16 +89,42 @@ class BaseTestCase extends TestCase
         $this->eventMachine = null;
     }
 
-    protected function registerUser(string $type = self::TYPE_ADMIN, array $roles = [self::ROLE_ADMIN]): Message
+    protected function registerUser(
+        string $type = self::TYPE_ADMIN,
+        array $roles = [self::ROLE_ADMIN],
+        array $data = ['username' => 'sudo']
+    ): Message
     {
         return $this->buildCmd(MsgDesc::CMD_REGISTER_USER, [
             MsgDesc::KEY_TENANT_ID => $this->tenantId->toString(),
             MsgDesc::KEY_USER_ID => $this->userId->toString(),
             MsgDesc::KEY_TYPE => $type,
             MsgDesc::KEY_ROLES => $roles,
-            MsgDesc::KEY_DATA => ['username' => 'sudo'],
+            MsgDesc::KEY_DATA => $data,
             MsgDesc::KEY_EMAIL => $this->adminLogin->email(),
             MsgDesc::KEY_PASSWORD => 'my_secret',
+        ]);
+    }
+
+    protected function defineUserTypeSchema(string $type = self::TYPE_EDITOR, array $schema = self::EDITOR_SCHEMA): Message
+    {
+        return $this->buildCmd(MsgDesc::CMD_DEFINE_USER_TYPE_SCHEMA, MsgDesc::defineUserTypeSchemaPayload(
+            $this->tenantId,
+            $type,
+            $schema
+        ));
+    }
+
+    protected function userTypeSchemaDefined(string $type = self::TYPE_EDITOR, array $schema = self::EDITOR_SCHEMA): Message
+    {
+        return $this->buildEvent(MsgDesc::EVT_USER_TYPE_SCHEMA_DEFINED, [
+            MsgDesc::KEY_TYPE_ID => UserTypeId::fromValues(
+                $this->tenantId,
+                UserType::fromString($type)
+            )->toString(),
+            MsgDesc::KEY_TENANT_ID => $this->tenantId->toString(),
+            MsgDesc::KEY_TYPE => $type,
+            MsgDesc::KEY_SCHEMA => $schema,
         ]);
     }
 

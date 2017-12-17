@@ -102,4 +102,18 @@ final class MsgDesc implements EventMachineDescription
             self::KEY_PASSWORD => $password,
         ]));
     }
+
+    public static function defineUserTypeSchemaPayload(string $tenantId, string $type, array $schema, string $userTypeId = null): array {
+        $p = [
+            self::KEY_TENANT_ID => $tenantId,
+            self::KEY_TYPE => $type,
+            self::KEY_SCHEMA => $schema
+        ];
+
+        if(null !== $userTypeId) {
+            $p[self::KEY_TYPE_ID] = $userTypeId;
+        }
+
+        return $p;
+    }
 }
