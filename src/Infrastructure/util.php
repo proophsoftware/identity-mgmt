@@ -32,6 +32,12 @@ function combine_regex_patterns(string $patternA, string $patternB, string ...$p
     return '^' . $combinedPattern . '$';
 };
 
+function assert_allowed_message(Message $message, array $allowedMessages): void {
+    if(!in_array($message->messageName(), $allowedMessages)) {
+        throw message_not_allowed($message, $allowedMessages);
+    }
+}
+
 //Exception factories
 function message_not_allowed(Message $message, array $allowedMessages): \RuntimeException {
     return new \RuntimeException("Message not allowed. Got {$message->messageName()}, but allowed are only " . implode(", ", $allowedMessages));

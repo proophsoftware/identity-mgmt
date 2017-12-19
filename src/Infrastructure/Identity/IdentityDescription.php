@@ -20,6 +20,11 @@ final class IdentityDescription implements EventMachineDescription
 
     public static function describe(EventMachine $eventMachine): void
     {
+        self::addIdentity($eventMachine);
+    }
+
+    public static function addIdentity(EventMachine $eventMachine): void
+    {
         $eventMachine->on(MsgDesc::EVT_USER_REGISTERED, AddIdentity::class);
 
         $eventMachine->process(MsgDesc::CMD_ADD_IDENTITY)
@@ -28,5 +33,7 @@ final class IdentityDescription implements EventMachineDescription
             ->handle([Identity::class, 'add'])
             ->recordThat(MsgDesc::EVT_IDENTITY_ADDED)
             ->apply([Identity::class, 'whenIdentityAdded']);
+
+        $eventMachine->on(MsgDesc::EVT_IDENTITY_ADDED, EmailVerificationMailer::class);
     }
 }

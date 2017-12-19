@@ -12,19 +12,27 @@ namespace App\Model;
 use App\Api\MsgDesc;
 use App\Model\Identity\Email;
 use App\Model\Identity\IdentityId;
+use App\Model\Identity\Verification;
 use Prooph\Common\Messaging\Message;
 
 final class Identity
 {
     public static function add(Message $addIdentity): \Generator {
-        yield $addIdentity->payload();
+        $payload = $addIdentity->payload();
+        $payload[MsgDesc::KEY_VERIFICATION] = Verification::initialize(self::newStateFromPayload($payload))->toArray();
+        yield $payload;
     }
 
     public static function whenIdentityAdded(Message $identityAdded): IdentityState {
+        return self::newStateFromPayload($identityAdded->payload());
+    }
+
+    private static function newStateFromPayload(array $payload): IdentityState
+    {
         return IdentityState::newIdentity(
-            IdentityId::fromString($identityAdded->payload()[MsgDesc::KEY_IDENTITY_ID]),
-            Email::fromString($identityAdded->payload()[MsgDesc::KEY_EMAIL]),
-            $identityAdded->payload()[MsgDesc::KEY_PASSWORD]
+            IdentityId::fromString($payload[MsgDesc::KEY_IDENTITY_ID]),
+            Email::fromString($payload[MsgDesc::KEY_EMAIL]),
+            $payload[MsgDesc::KEY_PASSWORD]
         );
     }
 }

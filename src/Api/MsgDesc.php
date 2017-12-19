@@ -55,6 +55,7 @@ final class MsgDesc implements EventMachineDescription
     //const KEY_USER_ID = 'userId';
     //const KEY_EMAIL = 'email';
     //const KEY_PASSWORD = 'password';
+    const KEY_VERIFICATION = 'verification';
 
     public static function describe(EventMachine $eventMachine): void
     {
@@ -77,6 +78,10 @@ final class MsgDesc implements EventMachineDescription
 
         //Identity
         $identityId = ['type' => 'string', 'pattern' => combine_regex_patterns(Email::VALIDATION_PATTERN, IdentityId::DELIMITER, $uuidSchema['pattern'])];
+        $verification = JsonSchema::object([
+            'identityId' => $identityId,
+            'verificationId' => $uuidSchema
+        ]);
 
         //Action: Define UserTypeSchema
         $eventMachine->registerCommand(self::CMD_DEFINE_USER_TYPE_SCHEMA, JsonSchema::object([
@@ -127,7 +132,8 @@ final class MsgDesc implements EventMachineDescription
             self::KEY_IDENTITY_ID => $identityId,
             self::KEY_USER_ID => $userId,
             self::KEY_EMAIL => $email,
-            self::KEY_PASSWORD => $password
+            self::KEY_PASSWORD => $password,
+            self::KEY_VERIFICATION => $verification,
         ]));
     }
 
