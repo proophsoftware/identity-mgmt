@@ -3,6 +3,12 @@ declare(strict_types = 1);
 
 return \FastRoute\simpleDispatcher(function(\FastRoute\RouteCollector $r) {
     $r->addRoute(
+        ['GET'],
+        \App\Http\Route::VERIFICATION . '/{verification:[A-Za-z0-9-]{36,36}}',
+        \App\Http\VerificationHandler::class
+    );
+
+    $r->addRoute(
         ['POST'],
         '/messagebox',
         \Prooph\EventMachine\Http\MessageBox::class

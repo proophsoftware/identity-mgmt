@@ -32,7 +32,7 @@ class UserTypeSchema
             TenantId::fromString($data[MsgDesc::KEY_TENANT_ID]),
             UserType::fromString($data[MsgDesc::KEY_TYPE])
         )->toString();
-        yield $data;
+        yield [MsgDesc::EVT_USER_TYPE_SCHEMA_DEFINED, $data];
     }
 
     public static function whenUserTypeSchemaDefined(Message $userTypeSchemaDefined): UserTypeSchemaState {

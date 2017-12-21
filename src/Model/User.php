@@ -35,7 +35,7 @@ final class User
             throw new \RuntimeException("Password was not hashed by infrastructure. You should add a command preprocessor.");
         }
 
-        yield $registerUser->payload();
+        yield [MsgDesc::EVT_USER_REGISTERED, $registerUser->payload()];
     }
 
     public static function whenUserRegistered(Message $userRegistered): UserState

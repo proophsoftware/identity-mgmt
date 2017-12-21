@@ -23,13 +23,18 @@ final class MsgDesc implements EventMachineDescription
 {
     const CONTEXT = 'Identity.';
 
+    //User and User Schema
     const CMD_DEFINE_USER_TYPE_SCHEMA = self::CONTEXT.'DefineUserTypeSchema';
     const CMD_REGISTER_USER = self::CONTEXT.'RegisterUser';
-    const CMD_ADD_IDENTITY = self::CONTEXT.'AddIdentity';
-
     const EVT_USER_TYPE_SCHEMA_DEFINED = self::CONTEXT.'UserTypeSchemaDefined';
     const EVT_USER_REGISTERED = self::CONTEXT.'UserRegistered';
+
+    //Identity
+    const CMD_ADD_IDENTITY = self::CONTEXT.'AddIdentity';
+    const CMD_VERIFY_IDENTITY = self::CONTEXT.'VerifyIdentity';
+
     const EVT_IDENTITY_ADDED = self::CONTEXT.'IdentityAdded';
+    const EVT_IDENTITY_VERIFIED = self::CONTEXT.'IdentityVerified';
 
     //Tenant Msg Keys
     const KEY_TENANT_ID = 'tenantId';
@@ -56,6 +61,7 @@ final class MsgDesc implements EventMachineDescription
     //const KEY_EMAIL = 'email';
     //const KEY_PASSWORD = 'password';
     const KEY_VERIFICATION = 'verification';
+    const KEY_VERIFICATION_ID = 'verificationId';
 
     public static function describe(EventMachine $eventMachine): void
     {
@@ -82,6 +88,7 @@ final class MsgDesc implements EventMachineDescription
             'identityId' => $identityId,
             'verificationId' => $uuidSchema
         ]);
+        $verificationId = $uuidSchema;
 
         //Action: Define UserTypeSchema
         $eventMachine->registerCommand(self::CMD_DEFINE_USER_TYPE_SCHEMA, JsonSchema::object([
@@ -128,11 +135,22 @@ final class MsgDesc implements EventMachineDescription
             self::KEY_PASSWORD => $password
         ]));
 
+        $eventMachine->registerCommand(self::CMD_VERIFY_IDENTITY, JsonSchema::object([
+            self::KEY_IDENTITY_ID => $identityId,
+            self::KEY_VERIFICATION_ID => $verificationId,
+        ]));
+
         $eventMachine->registerEvent(self::EVT_IDENTITY_ADDED, JsonSchema::object([
             self::KEY_IDENTITY_ID => $identityId,
             self::KEY_USER_ID => $userId,
             self::KEY_EMAIL => $email,
             self::KEY_PASSWORD => $password,
+            self::KEY_VERIFICATION => $verification,
+        ]));
+
+        $eventMachine->registerEvent(self::EVT_IDENTITY_VERIFIED, JsonSchema::object([
+            self::KEY_IDENTITY_ID => $identityId,
+            self::KEY_USER_ID => $userId,
             self::KEY_VERIFICATION => $verification,
         ]));
     }

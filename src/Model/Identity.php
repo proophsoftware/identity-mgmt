@@ -19,12 +19,30 @@ final class Identity
 {
     public static function add(Message $addIdentity): \Generator {
         $payload = $addIdentity->payload();
+
         $payload[MsgDesc::KEY_VERIFICATION] = Verification::initialize(self::newStateFromPayload($payload))->toArray();
-        yield $payload;
+        yield [MsgDesc::EVT_IDENTITY_ADDED, $payload];
     }
 
     public static function whenIdentityAdded(Message $identityAdded): IdentityState {
         return self::newStateFromPayload($identityAdded->payload());
+    }
+
+    public static function verify(IdentityState $state, Message $verifyIdentity): \Generator {
+        if($state->login()->verified()) {
+            //Duplicate message, do nothing
+            yield null;
+        }
+
+        yield [MsgDesc::EVT_IDENTITY_VERIFIED, [
+            MsgDesc::KEY_IDENTITY_ID => $state->identityId()->toString(),
+        ]];
+    }
+
+    public static function whenIdentityVerified(IdentityState $state, Message $identityVerified): IdentityState {
+        return $state->with([
+            'login' => $state->login()->markAsVerified()
+        ]);
     }
 
     private static function newStateFromPayload(array $payload): IdentityState

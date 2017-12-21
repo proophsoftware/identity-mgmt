@@ -11,6 +11,7 @@ namespace App\Service;
 
 use App\Http\MessageSchemaMiddleware;
 use App\Http\Route;
+use App\Http\VerificationHandler;
 use App\Infrastructure\EventMachine\MetadataCleaner;
 use App\Infrastructure\Identity\AddIdentity;
 use App\Infrastructure\Identity\EmailVerificationMailer;
@@ -119,6 +120,14 @@ final class ServiceFactory
                 $this->config->stringValue('mail.from_name'),
                 $this->config->stringValue('base_url') . Route::VERIFICATION
             );
+        });
+    }
+
+    //HTTP endpoints
+    public function verificationHandler(): VerificationHandler
+    {
+        return $this->makeSingleton(VerificationHandler::class, function () {
+            return new VerificationHandler($this->eventMachine());
         });
     }
 
