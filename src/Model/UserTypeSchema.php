@@ -9,7 +9,8 @@
 
 namespace App\Model;
 
-use App\Api\MsgDesc;
+use App\Api\Event;
+use App\Api\Payload;
 use App\Model\UserTypeSchema\UserType;
 use App\Model\UserTypeSchema\UserTypeId;
 use Prooph\Common\Messaging\Message;
@@ -28,11 +29,11 @@ class UserTypeSchema
 {
     public static function define(Message $defineUserTypeSchema): \Generator {
         $data = $defineUserTypeSchema->payload();
-        $data[MsgDesc::KEY_TYPE_ID] = UserTypeId::fromValues(
-            TenantId::fromString($data[MsgDesc::KEY_TENANT_ID]),
-            UserType::fromString($data[MsgDesc::KEY_TYPE])
+        $data[Payload::KEY_TYPE_ID] = UserTypeId::fromValues(
+            TenantId::fromString($data[Payload::KEY_TENANT_ID]),
+            UserType::fromString($data[Payload::KEY_TYPE])
         )->toString();
-        yield [MsgDesc::EVT_USER_TYPE_SCHEMA_DEFINED, $data];
+        yield [Event::USER_TYPE_SCHEMA_DEFINED, $data];
     }
 
     public static function whenUserTypeSchemaDefined(Message $userTypeSchemaDefined): UserTypeSchemaState {

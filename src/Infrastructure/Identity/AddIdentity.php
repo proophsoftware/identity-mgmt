@@ -9,7 +9,11 @@
 
 namespace App\Infrastructure\Identity;
 
-use App\Api\MsgDesc;
+use App\Api\Command;
+use App\Api\Event;
+use App\Api\MessageDescription;
+use App\Api\Payload;
+use App\Api\PayloadFactory;
 use function App\Infrastructure\message_not_allowed;
 use Prooph\Common\Messaging\Message;
 use Prooph\EventMachine\EventMachine;
@@ -21,7 +25,7 @@ final class AddIdentity
      */
     private $eventMachine;
 
-    private $allowedMessages = [MsgDesc::EVT_USER_REGISTERED];
+    private $allowedMessages = [Event::USER_REGISTERED];
 
     public function __construct(EventMachine $eventMachine)
     {
@@ -34,11 +38,11 @@ final class AddIdentity
             throw message_not_allowed($message, $this->allowedMessages);
         }
 
-        $this->eventMachine->dispatch(MsgDesc::CMD_ADD_IDENTITY, MsgDesc::addIdentityPayload(
-            $message->payload()[MsgDesc::KEY_TENANT_ID],
-            $message->payload()[MsgDesc::KEY_USER_ID],
-            $message->payload()[MsgDesc::KEY_EMAIL],
-            $message->payload()[MsgDesc::KEY_PASSWORD]
+        $this->eventMachine->dispatch(Command::ADD_IDENTITY, PayloadFactory::makeAddIdentityPayload(
+            $message->payload()[Payload::KEY_TENANT_ID],
+            $message->payload()[Payload::KEY_USER_ID],
+            $message->payload()[Payload::KEY_EMAIL],
+            $message->payload()[Payload::KEY_PASSWORD]
         ));
     }
 }

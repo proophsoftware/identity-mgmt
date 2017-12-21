@@ -9,7 +9,10 @@
 
 namespace App\Infrastructure\User;
 
-use App\Api\MsgDesc;
+use App\Api\Command;
+use App\Api\Metadata;
+use App\Api\Payload;
+use function App\Infrastructure\assert_allowed_message;
 use App\Model\TenantId;
 use App\Model\UserTypeSchema\UserType;
 use App\Model\UserTypeSchema\UserTypeId;
@@ -30,7 +33,7 @@ final class UserTypeSchemaValidator implements UserValidator
     }
 
     private $allowedMessages = [
-        MsgDesc::CMD_REGISTER_USER,
+        Command::REGISTER_USER,
     ];
 
     /**
@@ -38,25 +41,23 @@ final class UserTypeSchemaValidator implements UserValidator
      */
     public function preProcess(Message $message): Message
     {
-        if(!in_array($message->messageName(), $this->allowedMessages)) {
-            throw new \RuntimeException(__METHOD__ . " can only handle the messages: " . implode(', ', $this->allowedMessages));
-        }
+        assert_allowed_message($message, $this->allowedMessages);
 
         /** @var UserTypeSchemaState $userTypeSchemaState */
         $userTypeSchemaState = $this->eventMachine->loadAggregateState(
             UserTypeSchemaDescription::USER_TYPE_SCHEMA_AR,
             UserTypeId::fromValues(
-                TenantId::fromString($message->payload()[MsgDesc::KEY_TENANT_ID]),
-                UserType::fromString($message->payload()[MsgDesc::KEY_TYPE])
+                TenantId::fromString($message->payload()[Payload::KEY_TENANT_ID]),
+                UserType::fromString($message->payload()[Payload::KEY_TYPE])
             )
         );
 
         $this->eventMachine->jsonSchemaAssertion()->assert(
             $message->messageName(),
-            $message->payload()[MsgDesc::KEY_DATA],
+            $message->payload()[Payload::KEY_DATA],
             $userTypeSchemaState->schema()
         );
 
-        return $message->withAddedMetadata(MsgDesc::META_USER_VALIDATED, true);
+        return $message->withAddedMetadata(Metadata::META_USER_VALIDATED, true);
     }
 }

@@ -9,7 +9,9 @@
 
 namespace AppTest\Model;
 
-use App\Api\MsgDesc;
+use App\Api\Command;
+use App\Api\Event;
+use App\Api\Payload;
 use App\Model\UserTypeSchema\UserType;
 use App\Model\UserTypeSchema\UserTypeId;
 use AppTest\BaseTestCase;
@@ -32,25 +34,25 @@ class UserTypeSchemaTest extends BaseTestCase
         $this->eventMachine->bootstrapInTestMode([], $this->getDefineUserTypeSchemaServices());
 
         $payload = [
-            MsgDesc::KEY_TENANT_ID => $this->tenantId->toString(),
-            MsgDesc::KEY_TYPE => 'admin',
-            MsgDesc::KEY_SCHEMA => $this->adminSchema,
+            Payload::KEY_TENANT_ID => $this->tenantId->toString(),
+            Payload::KEY_TYPE => 'admin',
+            Payload::KEY_SCHEMA => $this->adminSchema,
         ];
 
-        $defineSchema = $this->buildCmd(MsgDesc::CMD_DEFINE_USER_TYPE_SCHEMA, $payload);
+        $defineSchema = $this->buildCmd(Command::DEFINE_USER_TYPE_SCHEMA, $payload);
 
         $this->eventMachine->dispatch($defineSchema);
 
         /** @var Message[] $events */
         $events = $this->eventMachine->popRecordedEventsOfTestSession();
 
-        $payload[MsgDesc::KEY_TYPE_ID] = UserTypeId::fromValues(
+        $payload[Payload::KEY_TYPE_ID] = UserTypeId::fromValues(
             $this->tenantId,
             UserType::fromString('admin')
         )->toString();
 
         $this->assertCount(1, $events);
-        $this->assertSame(MsgDesc::EVT_USER_TYPE_SCHEMA_DEFINED, $events[0]->messageName());
+        $this->assertSame(Event::USER_TYPE_SCHEMA_DEFINED, $events[0]->messageName());
         $this->assertEquals($payload, $events[0]->payload());
     }
 }

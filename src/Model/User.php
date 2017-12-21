@@ -9,7 +9,10 @@
 
 namespace App\Model;
 
-use App\Api\MsgDesc;
+use App\Api\Event;
+use App\Api\Metadata;
+use App\Api\MessageDescription;
+use App\Api\Payload;
 use Prooph\Common\Messaging\Message;
 
 /**
@@ -27,23 +30,23 @@ final class User
 {
     public static function register(Message $registerUser): \Generator
     {
-        if(!$registerUser->metadata()[MsgDesc::META_USER_VALIDATED] ?? false) {
+        if(!$registerUser->metadata()[Metadata::META_USER_VALIDATED] ?? false) {
             throw new \RuntimeException("User data was not validated by infrastructure. You should add a command preprocessor.");
         }
 
-        if(!$registerUser->metadata()[MsgDesc::META_PASSWORD_HASHED] ?? false) {
+        if(!$registerUser->metadata()[Metadata::META_PASSWORD_HASHED] ?? false) {
             throw new \RuntimeException("Password was not hashed by infrastructure. You should add a command preprocessor.");
         }
 
-        yield [MsgDesc::EVT_USER_REGISTERED, $registerUser->payload()];
+        yield [Event::USER_REGISTERED, $registerUser->payload()];
     }
 
     public static function whenUserRegistered(Message $userRegistered): UserState
     {
         $userData = $userRegistered->payload();
 
-        unset($userData[MsgDesc::KEY_EMAIL]);
-        unset($userData[MsgDesc::KEY_PASSWORD]);
+        unset($userData[Payload::KEY_EMAIL]);
+        unset($userData[Payload::KEY_PASSWORD]);
 
         $userData['identities'] = [];
 

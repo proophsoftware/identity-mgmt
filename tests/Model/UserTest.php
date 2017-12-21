@@ -9,7 +9,8 @@
 
 namespace AppTest\Model;
 
-use App\Api\MsgDesc;
+use App\Api\Event;
+use App\Api\Payload;
 use function App\Infrastructure\Password\pwd_verify;
 use AppTest\BaseTestCase;
 use Prooph\Common\Messaging\Message;
@@ -29,16 +30,16 @@ class UserTest extends BaseTestCase
         $events = $this->eventMachine->popRecordedEventsOfTestSession();
 
         $this->assertCount(1, $events);
-        $this->assertSame(MsgDesc::EVT_USER_REGISTERED, $events[0]->messageName());
+        $this->assertSame(Event::USER_REGISTERED, $events[0]->messageName());
 
         $cmdPayload = $this->registerUser()->payload();
         $evtPayload = $events[0]->payload();
 
-        $pwdHash = $evtPayload[MsgDesc::KEY_PASSWORD];
+        $pwdHash = $evtPayload[Payload::KEY_PASSWORD];
 
         //Prepare for comparision
-        unset($evtPayload[MsgDesc::KEY_PASSWORD]);
-        unset($cmdPayload[MsgDesc::KEY_PASSWORD]);
+        unset($evtPayload[Payload::KEY_PASSWORD]);
+        unset($cmdPayload[Payload::KEY_PASSWORD]);
 
         $this->assertEquals($cmdPayload, $evtPayload);
         $this->assertTrue(pwd_verify('my_secret', $pwdHash));

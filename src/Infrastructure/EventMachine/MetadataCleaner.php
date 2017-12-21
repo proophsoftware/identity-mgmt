@@ -9,15 +9,15 @@
 
 namespace App\Infrastructure\EventMachine;
 
-use App\Api\MsgDesc;
+use App\Api\Metadata;
 use Prooph\Common\Messaging\Message;
 use Prooph\EventMachine\Commanding\CommandPreProcessor;
 
 final class MetadataCleaner implements CommandPreProcessor
 {
     private $cleanKeys = [
-        MsgDesc::META_PASSWORD_HASHED,
-        MsgDesc::META_USER_VALIDATED,
+        Metadata::META_PASSWORD_HASHED,
+        Metadata::META_USER_VALIDATED,
     ];
 
 

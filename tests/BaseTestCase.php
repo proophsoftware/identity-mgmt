@@ -9,7 +9,10 @@
 
 namespace AppTest;
 
-use App\Api\MsgDesc;
+use App\Api\Command;
+use App\Api\Event;
+use App\Api\Payload;
+use App\Api\PayloadFactory;
 use App\Infrastructure\EventMachine\MetadataCleaner;
 use App\Infrastructure\Password\PasswordHasher;
 use App\Infrastructure\Password\PwdHashFuncHasher;
@@ -96,14 +99,14 @@ class BaseTestCase extends TestCase
         array $data = ['username' => 'sudo']
     ): Message
     {
-        return $this->buildCmd(MsgDesc::CMD_REGISTER_USER, [
-            MsgDesc::KEY_TENANT_ID => $this->tenantId->toString(),
-            MsgDesc::KEY_USER_ID => $this->userId->toString(),
-            MsgDesc::KEY_TYPE => $type,
-            MsgDesc::KEY_ROLES => $roles,
-            MsgDesc::KEY_DATA => $data,
-            MsgDesc::KEY_EMAIL => $this->adminLogin->lowercaseEmail()->toString(),
-            MsgDesc::KEY_PASSWORD => 'my_secret',
+        return $this->buildCmd(Command::REGISTER_USER, [
+            Payload::KEY_TENANT_ID => $this->tenantId->toString(),
+            Payload::KEY_USER_ID => $this->userId->toString(),
+            Payload::KEY_TYPE => $type,
+            Payload::KEY_ROLES => $roles,
+            Payload::KEY_DATA => $data,
+            Payload::KEY_EMAIL => $this->adminLogin->lowercaseEmail()->toString(),
+            Payload::KEY_PASSWORD => 'my_secret',
         ]);
     }
 
@@ -113,20 +116,20 @@ class BaseTestCase extends TestCase
         array $data = ['username' => 'sudo']
     ): Message
     {
-        return $this->buildEvent(MsgDesc::EVT_USER_REGISTERED, [
-            MsgDesc::KEY_TENANT_ID => $this->tenantId->toString(),
-            MsgDesc::KEY_USER_ID => $this->userId->toString(),
-            MsgDesc::KEY_TYPE => $type,
-            MsgDesc::KEY_ROLES => $roles,
-            MsgDesc::KEY_DATA => $data,
-            MsgDesc::KEY_EMAIL => $this->adminLogin->lowercaseEmail()->toString(),
-            MsgDesc::KEY_PASSWORD => 'my_secret',
+        return $this->buildEvent(Event::USER_REGISTERED, [
+            Payload::KEY_TENANT_ID => $this->tenantId->toString(),
+            Payload::KEY_USER_ID => $this->userId->toString(),
+            Payload::KEY_TYPE => $type,
+            Payload::KEY_ROLES => $roles,
+            Payload::KEY_DATA => $data,
+            Payload::KEY_EMAIL => $this->adminLogin->lowercaseEmail()->toString(),
+            Payload::KEY_PASSWORD => 'my_secret',
         ]);
     }
 
     protected function defineUserTypeSchema(string $type = self::TYPE_EDITOR, array $schema = self::EDITOR_SCHEMA): Message
     {
-        return $this->buildCmd(MsgDesc::CMD_DEFINE_USER_TYPE_SCHEMA, MsgDesc::defineUserTypeSchemaPayload(
+        return $this->buildCmd(Command::DEFINE_USER_TYPE_SCHEMA, PayloadFactory::makeDefineUserTypeSchemaPayload(
             $this->tenantId,
             $type,
             $schema
@@ -135,20 +138,20 @@ class BaseTestCase extends TestCase
 
     protected function userTypeSchemaDefined(string $type = self::TYPE_EDITOR, array $schema = self::EDITOR_SCHEMA): Message
     {
-        return $this->buildEvent(MsgDesc::EVT_USER_TYPE_SCHEMA_DEFINED, [
-            MsgDesc::KEY_TYPE_ID => UserTypeId::fromValues(
+        return $this->buildEvent(Event::USER_TYPE_SCHEMA_DEFINED, [
+            Payload::KEY_TYPE_ID => UserTypeId::fromValues(
                 $this->tenantId,
                 UserType::fromString($type)
             )->toString(),
-            MsgDesc::KEY_TENANT_ID => $this->tenantId->toString(),
-            MsgDesc::KEY_TYPE => $type,
-            MsgDesc::KEY_SCHEMA => $schema,
+            Payload::KEY_TENANT_ID => $this->tenantId->toString(),
+            Payload::KEY_TYPE => $type,
+            Payload::KEY_SCHEMA => $schema,
         ]);
     }
 
     protected function addIdentity(string $email = null, string $password = null): Message
     {
-        return $this->buildCmd(MsgDesc::CMD_ADD_IDENTITY, MsgDesc::addIdentityPayload(
+        return $this->buildCmd(Command::ADD_IDENTITY, PayloadFactory::makeAddIdentityPayload(
             $this->tenantId->toString(),
             $this->userId->toString(),
             $email? : $this->adminLogin->lowercaseEmail()->toString(),

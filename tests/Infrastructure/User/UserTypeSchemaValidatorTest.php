@@ -9,7 +9,7 @@
 
 namespace AppTest\Infrastructure\User;
 
-use App\Api\MsgDesc;
+use App\Api\Metadata;
 use App\Infrastructure\User\UserTypeSchemaValidator;
 use AppTest\BaseTestCase;
 
@@ -42,6 +42,6 @@ class UserTypeSchemaValidatorTest extends BaseTestCase
 
         $registerUser = $this->userTypeSchemaValidator->preProcess($registerUser);
 
-        $this->assertTrue($registerUser->metadata()[MsgDesc::META_USER_VALIDATED] ?? false);
+        $this->assertTrue($registerUser->metadata()[Metadata::META_USER_VALIDATED] ?? false);
     }
 }

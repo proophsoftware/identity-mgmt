@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace App\Config;
 
-use App\Api\MsgDesc;
+use App\Api\MessageDescription;
 use App\Infrastructure\Identity\IdentityDescription;
 use App\Infrastructure\User\UserDescription;
 use App\Infrastructure\User\UserTypeSchemaDescription;
@@ -13,7 +13,7 @@ return [
     'base_url' => getenv('BASE_URL'),
     'event_machine' => [
         'descriptions' => [
-            MsgDesc::class,
+            MessageDescription::class,
             UserTypeSchemaDescription::class,
             UserDescription::class,
             IdentityDescription::class,

@@ -9,7 +9,7 @@
 
 namespace AppTest\Mock;
 
-use App\Api\MsgDesc;
+use App\Api\Metadata;
 use App\Infrastructure\User\UserValidator;
 use Prooph\Common\Messaging\Message;
 
@@ -21,6 +21,6 @@ class NoopUserValidator implements UserValidator
      */
     public function preProcess(Message $message): Message
     {
-        return $message->withAddedMetadata(MsgDesc::META_USER_VALIDATED, true);
+        return $message->withAddedMetadata(Metadata::META_USER_VALIDATED, true);
     }
 }

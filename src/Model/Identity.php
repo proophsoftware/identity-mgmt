@@ -9,7 +9,8 @@
 
 namespace App\Model;
 
-use App\Api\MsgDesc;
+use App\Api\Event;
+use App\Api\Payload;
 use App\Model\Identity\Email;
 use App\Model\Identity\IdentityId;
 use App\Model\Identity\Verification;
@@ -20,8 +21,8 @@ final class Identity
     public static function add(Message $addIdentity): \Generator {
         $payload = $addIdentity->payload();
 
-        $payload[MsgDesc::KEY_VERIFICATION] = Verification::initialize(self::newStateFromPayload($payload))->toArray();
-        yield [MsgDesc::EVT_IDENTITY_ADDED, $payload];
+        $payload[Payload::KEY_VERIFICATION] = Verification::initialize(self::newStateFromPayload($payload))->toArray();
+        yield [Event::IDENTITY_ADDED, $payload];
     }
 
     public static function whenIdentityAdded(Message $identityAdded): IdentityState {
@@ -34,8 +35,8 @@ final class Identity
             yield null;
         }
 
-        yield [MsgDesc::EVT_IDENTITY_VERIFIED, [
-            MsgDesc::KEY_IDENTITY_ID => $state->identityId()->toString(),
+        yield [Event::IDENTITY_VERIFIED, [
+            Payload::KEY_IDENTITY_ID => $state->identityId()->toString(),
         ]];
     }
 
@@ -48,9 +49,9 @@ final class Identity
     private static function newStateFromPayload(array $payload): IdentityState
     {
         return IdentityState::newIdentity(
-            IdentityId::fromString($payload[MsgDesc::KEY_IDENTITY_ID]),
-            Email::fromString($payload[MsgDesc::KEY_EMAIL]),
-            $payload[MsgDesc::KEY_PASSWORD]
+            IdentityId::fromString($payload[Payload::KEY_IDENTITY_ID]),
+            Email::fromString($payload[Payload::KEY_EMAIL]),
+            $payload[Payload::KEY_PASSWORD]
         );
     }
 }

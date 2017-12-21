@@ -9,7 +9,8 @@
 
 namespace App\Infrastructure\Identity;
 
-use App\Api\MsgDesc;
+use App\Api\Event;
+use App\Api\Payload;
 use function App\Infrastructure\assert_allowed_message;
 use App\Model\Identity\Verification;
 use Prooph\Common\Messaging\Message;
@@ -36,7 +37,7 @@ final class EmailVerificationMailer
      */
     private $baseUrl;
 
-    private $allowedMessages = [MsgDesc::EVT_IDENTITY_ADDED];
+    private $allowedMessages = [Event::IDENTITY_ADDED];
 
     public function __construct(\Swift_Mailer $mailer, string $from, string $fromName, string $baseUrl)
     {
@@ -50,7 +51,7 @@ final class EmailVerificationMailer
     {
         assert_allowed_message($message, $this->allowedMessages);
 
-        $verification = Verification::fromArray($message->payload()[MsgDesc::KEY_VERIFICATION]);
+        $verification = Verification::fromArray($message->payload()[Payload::KEY_VERIFICATION]);
 
         $mail = new \Swift_Message();
 
@@ -78,7 +79,7 @@ final class EmailVerificationMailer
             </html>";
 
         $mail->addPart($html, 'text/html');
-        $mail->addTo($message->payload()[MsgDesc::KEY_EMAIL]);
+        $mail->addTo($message->payload()[Payload::KEY_EMAIL]);
         $mail->setSubject("Verify your email");
 
         $this->mailer->send($mail);
