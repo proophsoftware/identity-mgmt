@@ -3,13 +3,22 @@ declare(strict_types = 1);
 
 namespace App\Config;
 
-use App\Api\MsgDesc;
+use App\Api\MessageDescription;
 use App\Infrastructure\Identity\IdentityDescription;
 use App\Infrastructure\User\UserDescription;
 use App\Infrastructure\User\UserTypeSchemaDescription;
 
 return [
     'environment' => getenv('PROOPH_ENV')?: 'prod',
+    'base_url' => getenv('BASE_URL'),
+    'event_machine' => [
+        'descriptions' => [
+            MessageDescription::class,
+            UserTypeSchemaDescription::class,
+            UserDescription::class,
+            IdentityDescription::class,
+        ]
+    ],
     'pdo' => [
         'dsn' => getenv('PDO_DSN'),
         'user' => getenv('PDO_USER'),
@@ -34,12 +43,16 @@ return [
         ],
         'ui_exchange' => getenv('RABBIT_UI_EXCHANGE')?: 'ui-exchange',
     ],
-    'event_machine' => [
-        'descriptions' => [
-            MsgDesc::class,
-            UserTypeSchemaDescription::class,
-            UserDescription::class,
-            IdentityDescription::class,
+    'mail' => [
+        'from' => getenv('MAIL_FROM'),
+        'from_name' => getenv('MAIL_FROM_NAME'),
+        'delivery_address' => getenv('MAIL_DELIVERY_ADDRESS')?: null,
+        'smtp' => [
+            'host' => getenv('MAIL_SMTP_HOST'),
+            'port' => (int)getenv('MAIL_SMTP_PORT'),
+            'username' => getenv('MAIL_SMTP_USERNAME'),
+            'password' => getenv('MAIL_SMTP_PWD'),
+            'ssl' => getenv('MAIL_SMTP_SSL')
         ]
     ]
 ];

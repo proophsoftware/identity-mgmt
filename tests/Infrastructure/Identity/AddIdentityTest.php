@@ -9,7 +9,7 @@
 
 namespace AppTest\Infrastructure\Identity;
 
-use App\Api\MsgDesc;
+use App\Api\Event;
 use App\Infrastructure\Identity\AddIdentity;
 use AppTest\BaseTestCase;
 
@@ -29,6 +29,6 @@ class AddIdentityTest extends BaseTestCase
         $events = $this->eventMachine->popRecordedEventsOfTestSession();
 
         $this->assertCount(1, $events);
-        $this->assertEquals(MsgDesc::EVT_IDENTITY_ADDED, $events[0]->messageName());
+        $this->assertEquals(Event::IDENTITY_ADDED, $events[0]->messageName());
     }
 }

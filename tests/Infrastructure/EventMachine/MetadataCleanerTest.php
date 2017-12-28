@@ -9,7 +9,7 @@
 
 namespace AppTest\Infrastructure\EventMachine;
 
-use App\Api\MsgDesc;
+use App\Api\Metadata;
 use App\Infrastructure\EventMachine\MetadataCleaner;
 use AppTest\BaseTestCase;
 
@@ -22,7 +22,7 @@ class MetadataCleanerTest extends BaseTestCase
     {
         $cmd = $this->registerUser();
 
-        $cmd = $cmd->withAddedMetadata(MsgDesc::META_PASSWORD_HASHED, true)->withAddedMetadata(MsgDesc::META_USER_VALIDATED, true);
+        $cmd = $cmd->withAddedMetadata(Metadata::META_PASSWORD_HASHED, true)->withAddedMetadata(Metadata::META_USER_VALIDATED, true);
 
         $cmd = (new MetadataCleaner())->preProcess($cmd);
 

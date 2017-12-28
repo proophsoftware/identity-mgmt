@@ -9,7 +9,9 @@
 
 namespace App\Infrastructure\Password;
 
-use App\Api\MsgDesc;
+use App\Api\Command;
+use App\Api\Metadata;
+use App\Api\Payload;
 use Prooph\Common\Messaging\Message;
 use Prooph\Common\Messaging\MessageFactory;
 use function App\Infrastructure\replace_payload;
@@ -27,7 +29,7 @@ final class PwdHashFuncHasher implements PasswordHasher
     }
 
     private $allowedMessages = [
-        MsgDesc::CMD_REGISTER_USER,
+        Command::REGISTER_USER,
     ];
 
     /**
@@ -41,8 +43,8 @@ final class PwdHashFuncHasher implements PasswordHasher
 
         $payload = $message->payload();
 
-        $payload[MsgDesc::KEY_PASSWORD] = pwd_hash($payload[MsgDesc::KEY_PASSWORD]);
+        $payload[Payload::KEY_PASSWORD] = pwd_hash($payload[Payload::KEY_PASSWORD]);
 
-        return replace_payload($this->messageFactory, $message->withAddedMetadata(MsgDesc::META_PASSWORD_HASHED, true), $payload);
+        return replace_payload($this->messageFactory, $message->withAddedMetadata(Metadata::META_PASSWORD_HASHED, true), $payload);
     }
 }

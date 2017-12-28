@@ -9,7 +9,10 @@
 
 namespace App\Infrastructure\User;
 
-use App\Api\MsgDesc;
+use App\Api\Command;
+use App\Api\Event;
+use App\Api\MessageContext;
+use App\Api\Payload;
 use App\Infrastructure\EventMachine\MetadataCleaner;
 use App\Infrastructure\Password\PasswordHasher;
 use App\Model\User;
@@ -18,7 +21,7 @@ use Prooph\EventMachine\EventMachineDescription;
 
 class UserDescription implements EventMachineDescription
 {
-    const USER_AR = MsgDesc::CONTEXT . 'User';
+    const USER_AR = MessageContext::CONTEXT . 'User';
 
     public static function describe(EventMachine $eventMachine): void
     {
@@ -28,17 +31,17 @@ class UserDescription implements EventMachineDescription
     private static function registerUser(EventMachine $eventMachine): void
     {
         //Make sure that verification metadata keys are not set from the outside
-        $eventMachine->preProcess(MsgDesc::CMD_REGISTER_USER, MetadataCleaner::class);
+        $eventMachine->preProcess(Command::REGISTER_USER, MetadataCleaner::class);
         //Validate user data against UserTypeSchema
-        $eventMachine->preProcess(MsgDesc::CMD_REGISTER_USER, UserValidator::class);
+        $eventMachine->preProcess(Command::REGISTER_USER, UserValidator::class);
         //Hash pwd and add info in metadata
-        $eventMachine->preProcess(MsgDesc::CMD_REGISTER_USER, PasswordHasher::class);
+        $eventMachine->preProcess(Command::REGISTER_USER, PasswordHasher::class);
 
-        $eventMachine->process(MsgDesc::CMD_REGISTER_USER)
+        $eventMachine->process(Command::REGISTER_USER)
             ->withNew(self::USER_AR)
-            ->identifiedBy(MsgDesc::KEY_USER_ID)
+            ->identifiedBy(Payload::KEY_USER_ID)
             ->handle([User::class, 'register'])
-            ->recordThat(MsgDesc::EVT_USER_REGISTERED)
+            ->recordThat(Event::USER_REGISTERED)
             ->apply([User::class, 'whenUserRegistered']);
     }
 }

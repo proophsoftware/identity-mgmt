@@ -9,24 +9,34 @@
 
 namespace App\Infrastructure\Identity;
 
-use App\Api\MsgDesc;
+use App\Api\Command;
+use App\Api\Event;
+use App\Api\MessageContext;
+use App\Api\Payload;
 use App\Model\Identity;
 use Prooph\EventMachine\EventMachine;
 use Prooph\EventMachine\EventMachineDescription;
 
 final class IdentityDescription implements EventMachineDescription
 {
-    public const IDENTITY_AR = MsgDesc::CONTEXT . 'Identity';
+    public const IDENTITY_AR = MessageContext::CONTEXT . 'Identity';
 
     public static function describe(EventMachine $eventMachine): void
     {
-        $eventMachine->on(MsgDesc::EVT_USER_REGISTERED, AddIdentity::class);
+        self::addIdentity($eventMachine);
+    }
 
-        $eventMachine->process(MsgDesc::CMD_ADD_IDENTITY)
+    public static function addIdentity(EventMachine $eventMachine): void
+    {
+        $eventMachine->on(Event::USER_REGISTERED, AddIdentity::class);
+
+        $eventMachine->process(Command::ADD_IDENTITY)
             ->withNew(self::IDENTITY_AR)
-            ->identifiedBy(MsgDesc::KEY_IDENTITY_ID)
+            ->identifiedBy(Payload::KEY_IDENTITY_ID)
             ->handle([Identity::class, 'add'])
-            ->recordThat(MsgDesc::EVT_IDENTITY_ADDED)
+            ->recordThat(Event::IDENTITY_ADDED)
             ->apply([Identity::class, 'whenIdentityAdded']);
+
+        $eventMachine->on(Event::IDENTITY_ADDED, EmailVerificationMailer::class);
     }
 }

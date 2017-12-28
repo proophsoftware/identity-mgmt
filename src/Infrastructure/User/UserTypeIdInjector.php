@@ -9,7 +9,8 @@
 
 namespace App\Infrastructure\User;
 
-use App\Api\MsgDesc;
+use App\Api\Command;
+use App\Api\Payload;
 use function App\Infrastructure\replace_payload;
 use App\Model\TenantId;
 use App\Model\UserTypeSchema\UserType;
@@ -35,14 +36,14 @@ class UserTypeIdInjector implements CommandPreProcessor
      */
     public function preProcess(Message $message): Message
     {
-        if($message->messageName() !== MsgDesc::CMD_DEFINE_USER_TYPE_SCHEMA) {
+        if($message->messageName() !== Command::DEFINE_USER_TYPE_SCHEMA) {
             return $message;
         }
 
         $payload = $message->payload();
-        $payload[MsgDesc::KEY_TYPE_ID] = UserTypeId::fromValues(
-            TenantId::fromString($payload[MsgDesc::KEY_TENANT_ID]),
-            UserType::fromString($payload[MsgDesc::KEY_TYPE])
+        $payload[Payload::KEY_TYPE_ID] = UserTypeId::fromValues(
+            TenantId::fromString($payload[Payload::KEY_TENANT_ID]),
+            UserType::fromString($payload[Payload::KEY_TYPE])
         )->toString();
 
         return replace_payload($this->messageFactory, $message, $payload);

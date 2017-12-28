@@ -9,10 +9,12 @@
 
 namespace App\Service;
 
-use App\Http\EventMachineHttpMessageBox;
 use App\Http\MessageSchemaMiddleware;
+use App\Http\Route;
+use App\Http\VerificationHandler;
 use App\Infrastructure\EventMachine\MetadataCleaner;
 use App\Infrastructure\Identity\AddIdentity;
+use App\Infrastructure\Identity\EmailVerificationMailer;
 use App\Infrastructure\Logger\PsrErrorLogger;
 use App\Infrastructure\MongoDb\AggregateReadModel;
 use App\Infrastructure\MongoDb\MongoConnection;
@@ -22,8 +24,6 @@ use App\Infrastructure\User\UserTypeIdInjector;
 use App\Infrastructure\User\UserTypeSchemaValidator;
 use App\Infrastructure\User\UserValidator;
 use Codeliner\ArrayReader\ArrayReader;
-use Interop\Http\ServerMiddleware\DelegateInterface;
-use Interop\Http\ServerMiddleware\MiddlewareInterface;
 use MongoDB\Client;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -44,7 +44,6 @@ use Prooph\ServiceBus\CommandBus;
 use Prooph\ServiceBus\EventBus;
 use Prooph\ServiceBus\Message\HumusAmqp\AmqpMessageProducer;
 use Psr\Container\ContainerInterface;
-use Psr\Http\Message\ServerRequestInterface;
 use Psr\Log\LoggerInterface;
 use Zend\Diactoros\Response;
 use Zend\Stratigility\Middleware\ErrorHandler;
@@ -112,6 +111,26 @@ final class ServiceFactory
         });
     }
 
+    public function emailVerificationMailer(): EmailVerificationMailer
+    {
+        return $this->makeSingleton(EmailVerificationMailer::class, function () {
+            return new EmailVerificationMailer(
+                $this->mailTransport(),
+                $this->config->stringValue('mail.from'),
+                $this->config->stringValue('mail.from_name'),
+                $this->config->stringValue('base_url') . Route::VERIFICATION
+            );
+        });
+    }
+
+    //HTTP endpoints
+    public function verificationHandler(): VerificationHandler
+    {
+        return $this->makeSingleton(VerificationHandler::class, function () {
+            return new VerificationHandler($this->eventMachine());
+        });
+    }
+
     public function httpMessageBox(): MessageBox
     {
         return $this->makeSingleton(MessageBox::class, function () {
@@ -141,7 +160,7 @@ final class ServiceFactory
         });
     }
 
-    public function mongoConnection(string $server = '', string $db = ''): MongoConnection
+    public function mongoConnection(): MongoConnection
     {
         return $this->makeSingleton(MongoConnection::class, function () {
             $this->assertMandatoryConfigExists('mongo.server');
@@ -205,16 +224,7 @@ final class ServiceFactory
         });
     }
 
-    /**
-     * @Bean({
-     *   "parameters"={
-     *        @Parameter({"name" = "config.rabbit.connection"}),
-     *        @Parameter({"name" = "config.rabbit.ui_exchange"}),
-     *     }
-     * })
-     * @return AmqpMessageProducer
-     */
-    public function uiExchange(array $connection = [], string $uiExchange = 'ui-exchange'): AmqpMessageProducer
+    public function uiExchange(): AmqpMessageProducer
     {
         return $this->makeSingleton(AmqpMessageProducer::class, function () {
            $this->assertMandatoryConfigExists('rabbit.connection');
@@ -264,6 +274,28 @@ final class ServiceFactory
             $streamHandler = new StreamHandler('php://stderr');
 
             return new Logger('EventMachine', [$streamHandler]);
+        });
+    }
+
+    public function mailTransport(): \Swift_Mailer
+    {
+        return $this->makeSingleton(\Swift_Mailer::class, function () {
+            $transport =  (new \Swift_SmtpTransport(
+                $this->config->stringValue('mail.smtp.host'),
+                $this->config->integerValue('mail.smtp.port')
+            ))
+                ->setUsername($this->config->stringValue('mail.smtp.username'))
+                ->setPassword($this->config->stringValue('mail.smtp.password'));
+
+            if($this->config->mixedValue('mail.smtp.ssl')) {
+                $transport->setEncryption($this->config->stringValue('mail.smtp.ssl'));
+            }
+
+            if($deliveryAddress = $this->config->mixedValue('mail.delivery_address')) {
+                throw new \RuntimeException("@TODO activate swift mailer redirecting plugin");
+            }
+
+            return new \Swift_Mailer($transport);
         });
     }
 

@@ -9,7 +9,7 @@
 
 namespace AppTest\Mock;
 
-use App\Api\MsgDesc;
+use App\Api\Metadata;
 use App\Infrastructure\Password\PasswordHasher;
 use Prooph\Common\Messaging\Message;
 
@@ -21,6 +21,6 @@ final class NoopPasswordHasher implements PasswordHasher
      */
     public function preProcess(Message $message): Message
     {
-        return $message->withAddedMetadata(MsgDesc::META_PASSWORD_HASHED, true);
+        return $message->withAddedMetadata(Metadata::META_PASSWORD_HASHED, true);
     }
 }

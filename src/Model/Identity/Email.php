@@ -25,7 +25,7 @@ final class Email
 
     private function __construct(string $email)
     {
-        if(!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+        if(!preg_match('/'.self::VALIDATION_PATTERN.'/', $email)) {
             throw new \InvalidArgumentException("Email is not valid. Got " . $email);
         }
         $this->email = $email;
