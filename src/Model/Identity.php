@@ -14,6 +14,7 @@ use App\Api\Payload;
 use App\Model\Identity\Email;
 use App\Model\Identity\IdentityId;
 use App\Model\Identity\Verification;
+use App\Model\User\UserId;
 use Prooph\Common\Messaging\Message;
 
 final class Identity
@@ -37,6 +38,7 @@ final class Identity
 
         yield [Event::IDENTITY_VERIFIED, [
             Payload::KEY_IDENTITY_ID => $state->identityId()->toString(),
+            Payload::KEY_USER_ID => $state->userId()->toString(),
         ]];
     }
 
@@ -50,6 +52,7 @@ final class Identity
     {
         return IdentityState::newIdentity(
             IdentityId::fromString($payload[Payload::KEY_IDENTITY_ID]),
+            UserId::fromString($payload[Payload::KEY_USER_ID]),
             Email::fromString($payload[Payload::KEY_EMAIL]),
             $payload[Payload::KEY_PASSWORD]
         );

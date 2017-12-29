@@ -9,6 +9,11 @@
 
 namespace App\Http;
 
+use App\Api\Command;
+use App\Api\PayloadFactory;
+use function App\Infrastructure\now;
+use App\Infrastructure\VerificationSession\VerificationSessionDescription;
+use App\Model\VerificationSessionState;
 use Interop\Http\Server\RequestHandlerInterface;
 use Prooph\EventMachine\EventMachine;
 use Psr\Http\Message\ServerRequestInterface;
@@ -31,12 +36,31 @@ final class VerificationHandler implements RequestHandlerInterface
      */
     public function handle(ServerRequestInterface $request)
     {
-        //@TODO: Redirect to a verification ok page defined by user type schema
-        if(!$verificationId = $request->getAttribute('verification', false)) {
-            throw new \InvalidArgumentException("Missing verification id");
-        }
+        try {
+            if(!$verificationId = $request->getAttribute('verification', false)) {
+                throw new \InvalidArgumentException("Missing verification id");
+            }
 
-        //@TODO: Use a finder to check if verification id is valid and linked with an IdentityId, prepare command and dispatch
-        return new JsonResponse(['verification' => $request->getAttribute('verification')]);
+            /** @var VerificationSessionState $verificationSession */
+            $verificationSession = $this->eventMachine->loadAggregateState(
+                VerificationSessionDescription::VERIFICATION_SESSION_AR,
+                $verificationId
+            );
+
+            if($verificationSession->sessionExpiration()->isExpired(now())) {
+                throw new \RuntimeException('Verification session expired');
+            }
+
+            $this->eventMachine->dispatch(Command::VERIFY_IDENTITY, PayloadFactory::makeVerifyIdentityPayload(
+                $verificationSession->identityId()->toString(),
+                $verificationSession->verificationId()->toString()
+            ));
+
+            //@TODO: Redirect to a verification ok page defined by user type schema
+            return new JsonResponse(['verification' => true]);
+        } catch (\Throwable $error) {
+            //@TODO: Redirect to a verification failed page defined by user type schema
+            throw $error;
+        }
     }
 }

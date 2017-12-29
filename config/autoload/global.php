@@ -7,6 +7,7 @@ use App\Api\MessageDescription;
 use App\Infrastructure\Identity\IdentityDescription;
 use App\Infrastructure\User\UserDescription;
 use App\Infrastructure\User\UserTypeSchemaDescription;
+use App\Infrastructure\VerificationSession\VerificationSessionDescription;
 
 return [
     'environment' => getenv('PROOPH_ENV')?: 'prod',
@@ -17,6 +18,7 @@ return [
             UserTypeSchemaDescription::class,
             UserDescription::class,
             IdentityDescription::class,
+            VerificationSessionDescription::class,
         ]
     ],
     'pdo' => [

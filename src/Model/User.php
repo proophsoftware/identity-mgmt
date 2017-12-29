@@ -13,6 +13,9 @@ use App\Api\Event;
 use App\Api\Metadata;
 use App\Api\MessageDescription;
 use App\Api\Payload;
+use App\Model\Identity\Email;
+use App\Model\Identity\IdentityId;
+use App\Model\User\IdentityCollection;
 use Prooph\Common\Messaging\Message;
 
 /**
@@ -44,11 +47,17 @@ final class User
     public static function whenUserRegistered(Message $userRegistered): UserState
     {
         $userData = $userRegistered->payload();
+        $email = Email::fromString($userData[Payload::KEY_EMAIL]);
 
         unset($userData[Payload::KEY_EMAIL]);
         unset($userData[Payload::KEY_PASSWORD]);
 
-        $userData['identities'] = [];
+        $userData['identities'] = IdentityCollection::makeNew()->set(
+            IdentityId::fromValues(
+                TenantId::fromString($userData[Payload::KEY_TENANT_ID]),
+                $email
+            )
+        )->toArray();
 
         return UserState::fromArray($userData);
     }

@@ -9,6 +9,7 @@
 
 namespace App\Model;
 
+use App\Model\User\IdentityCollection;
 use App\Model\User\UserId;
 use MongoDB\BSON\Serializable;
 use Prooph\EventMachine\Data\ImmutableRecord;
@@ -44,7 +45,7 @@ final class UserState implements ImmutableRecord, Serializable
     private $data;
 
     /**
-     * @var array
+     * @var IdentityCollection
      */
     private $identities;
 
@@ -89,9 +90,9 @@ final class UserState implements ImmutableRecord, Serializable
     }
 
     /**
-     * @return array
+     * @return IdentityCollection
      */
-    public function identities(): array
+    public function identities(): IdentityCollection
     {
         return $this->identities;
     }

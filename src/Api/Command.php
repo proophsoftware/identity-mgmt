@@ -17,4 +17,6 @@ interface Command extends MessageContext
     //Identity
     const ADD_IDENTITY = self::CONTEXT.'AddIdentity';
     const VERIFY_IDENTITY = self::CONTEXT.'VerifyIdentity';
+    //Verification Session
+    const START_VERIFICATION_SESSION = self::CONTEXT.'StartVerificationSession';
 }
