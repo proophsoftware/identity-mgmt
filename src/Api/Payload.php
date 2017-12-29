@@ -33,4 +33,6 @@ interface Payload
     //const KEY_PASSWORD = 'password';
     const KEY_VERIFICATION = 'verification';
     const KEY_VERIFICATION_ID = 'verificationId';
+    //Verification Session
+    const KEY_VERIFICATION_SESSION_EXPIRATION = 'sessionExpiration';
 }

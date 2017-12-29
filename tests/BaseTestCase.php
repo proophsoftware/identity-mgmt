@@ -18,7 +18,12 @@ use App\Infrastructure\Password\PasswordHasher;
 use App\Infrastructure\Password\PwdHashFuncHasher;
 use App\Infrastructure\User\UserTypeIdInjector;
 use App\Infrastructure\User\UserValidator;
+use App\Model\Identity\Email;
+use App\Model\Identity\IdentityId;
 use App\Model\Identity\Login;
+use App\Model\Identity\Verification;
+use App\Model\Identity\VerificationId;
+use App\Model\IdentityState;
 use App\Model\TenantId;
 use App\Model\User\UserId;
 use App\Model\UserTypeSchema\UserType;
@@ -62,6 +67,11 @@ class BaseTestCase extends TestCase
     protected $userId;
 
     /**
+     * @var IdentityState
+     */
+    protected $adminIdentity;
+
+    /**
      * @var Login
      */
     protected $adminLogin;
@@ -78,12 +88,21 @@ class BaseTestCase extends TestCase
 
         $this->eventMachine->initialize(new EventMachineContainer($this->eventMachine));
 
+        $email = Email::fromString('admin@prooph.local');
+        $passwordHash = '$2y$10$9s6ahvJfptN/m3BRcl6oJONqvwU0fQeif5KUDuzR259gcOyZqKfRO';
+
         $this->tenantId = TenantId::fromString('03c8d742-1bed-46d1-a985-080b9a036656');
         $this->userId = UserId::fromString('42282edf-9007-4218-b3f8-931580d1abd0');
+        $this->adminIdentity = IdentityState::newIdentity(
+            IdentityId::fromValues($this->tenantId, $email),
+            $this->userId,
+            $email,
+            $passwordHash
+        );
         $this->adminLogin = Login::fromArray([
             'tenantId' => $this->tenantId->toString(),
-            'lowercaseEmail' => 'admin@prooph.local',
-            'passwordHash' => '$2y$10$9s6ahvJfptN/m3BRcl6oJONqvwU0fQeif5KUDuzR259gcOyZqKfRO',
+            'lowercaseEmail' => $email->toLowercase()->toString(),
+            'passwordHash' => $passwordHash,
             'verified' => true
         ]);
     }
@@ -157,6 +176,38 @@ class BaseTestCase extends TestCase
             $email? : $this->adminLogin->lowercaseEmail()->toString(),
             $password? : $this->adminLogin->passwordHash()
         ));
+    }
+
+    protected function identityAdded(string $email = null, string $password = null): Message
+    {
+        if(!is_null($email) || !is_null($password)) {
+            $email = Email::fromString($email? : $this->adminIdentity->email()->toString());
+
+            $identity = IdentityState::newIdentity(
+                IdentityId::fromValues($this->tenantId, $email),
+                $this->userId,
+                $email,
+                $password? : $this->adminIdentity->login()->passwordHash()
+            );
+        } else {
+            $identity = $this->adminIdentity;
+        }
+
+        return $this->buildEvent(Event::IDENTITY_ADDED, [
+            Payload::KEY_IDENTITY_ID => $identity->identityId()->toString(),
+            Payload::KEY_USER_ID => $this->userId->toString(),
+            Payload::KEY_EMAIL => $identity->email()->toString(),
+            Payload::KEY_PASSWORD => $identity->login()->passwordHash(),
+            Payload::KEY_VERIFICATION => Verification::initialize($identity)->toArray()
+        ]);
+    }
+
+    protected function startVerificationSession(): Message
+    {
+        return $this->buildCmd(Command::START_VERIFICATION_SESSION, [
+            Payload::KEY_VERIFICATION_ID => VerificationId::generate()->toString(),
+            Payload::KEY_IDENTITY_ID => $this->adminIdentity->identityId()->toString(),
+        ]);
     }
 
     protected function getRegisterUserServices($mockPasswordHasher = true): array

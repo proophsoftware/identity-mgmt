@@ -12,6 +12,7 @@ namespace App\Model;
 use App\Model\Identity\Email;
 use App\Model\Identity\IdentityId;
 use App\Model\Identity\Login;
+use App\Model\User\UserId;
 use MongoDB\BSON\Serializable;
 use Prooph\EventMachine\Data\ImmutableRecord;
 use Prooph\EventMachine\Data\ImmutableRecordLogic;
@@ -26,6 +27,11 @@ final class IdentityState implements ImmutableRecord, Serializable
     private $identityId;
 
     /**
+     * @var UserId
+     */
+    private $userId;
+
+    /**
      * @var Email
      */
     private $email;
@@ -35,10 +41,11 @@ final class IdentityState implements ImmutableRecord, Serializable
      */
     private $login;
 
-    public static function newIdentity(IdentityId $identityId, Email $email, string $password): self
+    public static function newIdentity(IdentityId $identityId, UserId $userId, Email $email, string $password): self
     {
         return self::fromArray([
             'identityId' => $identityId->toString(),
+            'userId' => $userId->toString(),
             'email' => $email->toString(),
             'login' => Login::fromCredentials($identityId->tenantId(), $email, $password)->toArray(),
         ]);
@@ -50,6 +57,14 @@ final class IdentityState implements ImmutableRecord, Serializable
     public function identityId(): IdentityId
     {
         return $this->identityId;
+    }
+
+    /**
+     * @return UserId
+     */
+    public function userId(): UserId
+    {
+        return $this->userId;
     }
 
     /**

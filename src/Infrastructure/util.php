@@ -42,3 +42,8 @@ function assert_allowed_message(Message $message, array $allowedMessages): void 
 function message_not_allowed(Message $message, array $allowedMessages): \RuntimeException {
     return new \RuntimeException("Message not allowed. Got {$message->messageName()}, but allowed are only " . implode(", ", $allowedMessages));
 };
+
+//Time
+function now(): \DateTimeImmutable {
+    return new \DateTimeImmutable('now', new \DateTimeZone('UTC'));
+}

@@ -23,6 +23,7 @@ use App\Infrastructure\Password\PwdHashFuncHasher;
 use App\Infrastructure\User\UserTypeIdInjector;
 use App\Infrastructure\User\UserTypeSchemaValidator;
 use App\Infrastructure\User\UserValidator;
+use App\Infrastructure\VerificationSession\StartVerificationSession;
 use Codeliner\ArrayReader\ArrayReader;
 use MongoDB\Client;
 use Monolog\Handler\StreamHandler;
@@ -120,6 +121,13 @@ final class ServiceFactory
                 $this->config->stringValue('mail.from_name'),
                 $this->config->stringValue('base_url') . Route::VERIFICATION
             );
+        });
+    }
+
+    public function startVerificationSession(): StartVerificationSession
+    {
+        return $this->makeSingleton(StartVerificationSession::class, function () {
+            return new StartVerificationSession($this->eventMachine());
         });
     }
 

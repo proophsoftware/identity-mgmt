@@ -49,4 +49,18 @@ final class PayloadFactory
             Payload::KEY_PASSWORD => $password
         ];
     }
+
+    public static function makeVerifyIdentityPayload(string $identityId, string $verificationId): array {
+        return [
+            Payload::KEY_IDENTITY_ID => $identityId,
+            Payload::KEY_VERIFICATION_ID => $verificationId,
+        ];
+    }
+
+    public static function makeStartVerificationSessionPayload(string $verificationId, string $identityId): array {
+        return [
+            Payload::KEY_VERIFICATION_ID => $verificationId,
+            Payload::KEY_IDENTITY_ID => $identityId,
+        ];
+    }
 }

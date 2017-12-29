@@ -26,6 +26,7 @@ final class MessageDescription implements EventMachineDescription
         //Misc
         $uuidSchema = ['type' => 'string', 'pattern' => Uuid::VALID_PATTERN];
         $tenantId = $uuidSchema;
+        $iso8601 = ['type' => 'string', 'pattern' => '^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(Z|(\+|-)\d{2}(:?\d{2})?)$'];
 
         //User
         $userId = $uuidSchema;
@@ -47,6 +48,9 @@ final class MessageDescription implements EventMachineDescription
             'verificationId' => $uuidSchema
         ]);
         $verificationId = $uuidSchema;
+
+        //Verification Session
+        $verificationExpiration = $iso8601;
 
         //Action: Define UserTypeSchema
         $eventMachine->registerCommand(Command::DEFINE_USER_TYPE_SCHEMA, JsonSchema::object([
@@ -109,7 +113,18 @@ final class MessageDescription implements EventMachineDescription
         $eventMachine->registerEvent(Event::IDENTITY_VERIFIED, JsonSchema::object([
             Payload::KEY_IDENTITY_ID => $identityId,
             Payload::KEY_USER_ID => $userId,
-            Payload::KEY_VERIFICATION => $verification,
+        ]));
+
+        //Action Start Verification Session
+        $eventMachine->registerCommand(Command::START_VERIFICATION_SESSION, JsonSchema::object([
+            Payload::KEY_VERIFICATION_ID => $verificationId,
+            Payload::KEY_IDENTITY_ID => $identityId,
+        ]));
+
+        $eventMachine->registerEvent(Event::VERIFICATION_SESSION_STARTED, JsonSchema::object([
+            Payload::KEY_VERIFICATION_ID => $verificationId,
+            Payload::KEY_IDENTITY_ID => $identityId,
+            Payload::KEY_VERIFICATION_SESSION_EXPIRATION => $verificationExpiration,
         ]));
     }
 }

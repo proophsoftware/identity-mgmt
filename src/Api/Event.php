@@ -17,4 +17,6 @@ interface Event extends MessageContext
     //Identity
     const IDENTITY_ADDED = self::CONTEXT.'IdentityAdded';
     const IDENTITY_VERIFIED = self::CONTEXT.'IdentityVerified';
+    //Verification Session
+    const VERIFICATION_SESSION_STARTED = self::CONTEXT.'VerificationSessionStarted';
 }
